@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administración</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .admin-table input[type="text"].editable-comma {
+            width: 75px;
+            padding: 8px 10px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            text-align: center;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            background: white;
+            transition: all 0.3s ease;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            direction: ltr;
+            unicode-bidi: plaintext;
+        }
+        
+        .admin-table input[type="text"].editable-comma:focus {
+            border-color: #667eea;
+            background: #f8f9ff;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15);
+            transform: scale(1.05);
+        }
+        
+        .admin-table input[type="text"].editable-comma:hover {
+            border-color: #999;
+            background: #fafafa;
+        }
+        
+        .admin-table input[type="text"].editable-comma.error {
+            border-color: #f44336 !important;
+            background: #fff5f5 !important;
+        }
+        
+        .admin-table input[type="text"].editable-comma.success {
+            border-color: #4CAF50 !important;
+            background: #f0faf0 !important;
+        }
+        
+        .admin-table td {
+            padding: 6px 8px;
+            min-width: 60px;
+            font-variant-numeric: tabular-nums;
+            font-size: 0.85rem;
+        }
+        
+        .admin-table th {
+            padding: 10px 12px;
+            font-size: 0.8rem;
+            white-space: nowrap;
+        }
+        
+        .admin-table td:first-child {
+            font-weight: 700;
+            font-size: 0.85rem;
+            min-width: 150px;
+            color: #2c3e50;
+        }
+        
+        .final-grade {
+            font-weight: 700;
+            font-size: 1rem;
+            color: #4CAF50;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .semana-evaluada {
+            color: #4CAF50;
+        }
+        
+        .semana-no-evaluada {
+            color: #ccc;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+        
+        .badge-success {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .badge-warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .badge-info {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+        
+        @media (max-width: 768px) {
+            .admin-table input[type="text"].editable-comma {
+                width: 50px;
+                padding: 4px 6px;
+                font-size: 0.75rem;
+            }
+            .admin-table td {
+                padding: 4px 4px;
+                min-width: 40px;
+                font-size: 0.7rem;
+            }
+            .admin-table td:first-child {
+                font-size: 0.7rem;
+                min-width: 80px;
+            }
+            .admin-table th {
+                padding: 6px 4px;
+                font-size: 0.65rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <header>
+            <div class="header-content">
+                <h1>⚙️ Panel de Administración</h1>
+                <div class="user-info">
+                    <span>Administrador</span>
+                    <a href="{{ url_for('logout') }}" class="btn-logout">Cerrar Sesión</a>
+                </div>
+            </div>
+        </header>
+
+        <main>
+            <div class="admin-nav">
+                <button class="nav-btn active" data-section="general">📊 General</button>
+                <button class="nav-btn" data-section="cuaderno">📓 Cuaderno</button>
+                <button class="nav-btn" data-section="gestion">🧪 Gestión</button>
+                <button class="nav-btn" data-section="quiz">📝 Quiz</button>
+                <button class="nav-btn" data-section="informes">📄 Informes</button>
+            </div>
+
+            <div id="admin-content">
+                <!-- Sección General -->
+                <div class="section-content active" id="section-general">
+                    <h2>Notas Generales <small style="font-weight: normal; color: #666;">(Base 20 - 10 semanas)</small></h2>
+                    <div style="margin-bottom: 16px; padding: 12px; background: #f8f9fa; border-radius: 8px; font-size: 0.9rem;">
+                        <span>✅ Semanas evaluadas: </span>
+                        {% for estudiante, semanas in estudiantes.semanas_evaluadas.items() %}
+                        <span style="margin-right: 16px;">
+                            {{ estudiante.split()[0] }}: 
+                            <span class="badge badge-success">{{ semanas.cuaderno }}</span> |
+                            <span class="badge badge-info">{{ semanas.gestion }}</span> |
+                            <span class="badge badge-warning">{{ semanas.quiz }}</span>
+                        </span>
+                        {% endfor %}
+                    </div>
+                    <div class="table-responsive">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>Estudiante</th>
+                                    <th>Bloque A (85%)</th>
+                                    <th>Bloque B (15%)</th>
+                                    <th>Nota Final</th>
+                                    <th>Detalle</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for estudiante, final in estudiantes.final.items() %}
+                                <tr>
+                                    <td>{{ estudiante }}</td>
+                                    <td>
+                                        <input type="text" class="editable editable-comma" 
+                                               data-estudiante="{{ estudiante }}" 
+                                               data-campo="bloqueA" 
+                                               value="{{ estudiantes.bloqueA[estudiante]|comma }}"
+                                               step="0.01" min="0" max="20"
+                                               title="Nota Bloque A (0-20)"
+                                               data-original="{{ estudiantes.bloqueA[estudiante] }}">
+                                    </td>
+                                    <td>
+                                        <input type="text" class="editable editable-comma" 
+                                               data-estudiante="{{ estudiante }}" 
+                                               data-campo="bloqueB" 
+                                               value="{{ estudiantes.bloqueB_raw[estudiante]|comma }}"
+                                               step="0.01" min="0" max="20"
+                                               title="Nota Bloque B (0-20)"
+                                               data-original="{{ estudiantes.bloqueB_raw[estudiante] }}">
+                                    </td>
+                                    <td class="final-grade">{{ final|comma }}</td>
+                                    <td style="font-size: 0.75rem; color: #666;">
+                                        {{ estudiantes.bloqueA[estudiante]|comma }} × 0,85 + 
+                                        {{ estudiantes.bloqueB_raw[estudiante]|comma }} × 0,15
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Sección Cuaderno -->
+                <div class="section-content" id="section-cuaderno">
+                    <h2>Notas de Cuaderno <small style="font-weight: normal; color: #666;">(10 semanas)</small></h2>
+                    <div class="table-responsive">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>Estudiante</th>
+                                    {% for i in range(1, 11) %}
+                                    <th>Sem {{ i }}</th>
+                                    {% endfor %}
+                                    <th>Prom</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for estudiante, notas in estudiantes.cuaderno.items() %}
+                                <tr>
+                                    <td>{{ estudiante }}</td>
+                                    {% for i in range(10) %}
+                                    <td>
+                                        <input type="text" class="editable editable-comma" 
+                                               data-estudiante="{{ estudiante }}" 
+                                               data-campo="cuaderno"
+                                               data-indice="{{ i }}"
+                                               value="{{ notas[i]|comma }}"
+                                               step="0.01" min="0" max="20"
+                                               title="Semana {{ i+1 }} (0-20)"
+                                               data-original="{{ notas[i] }}">
+                                        {% if notas[i] > 0 %}
+                                        <span style="font-size: 0.6rem; color: #4CAF50;">✓</span>
+                                        {% endif %}
+                                    </td>
+                                    {% endfor %}
+                                    <td style="font-weight: 600; color: #2196F3;">
+                                        {{ (notas[:10]|select('gt', 0)|list|sum / (notas[:10]|select('gt', 0)|list|length) if (notas[:10]|select('gt', 0)|list|length) > 0 else 0)|comma }}
+                                        <span style="font-size: 0.6rem; color: #999;">
+                                            ({{ notas[:10]|select('gt', 0)|list|length }}/10)
+                                        </span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Sección Gestión -->
+                <div class="section-content" id="section-gestion">
+                    <h2>Notas de Gestión de Laboratorio <small style="font-weight: normal; color: #666;">(10 semanas)</small></h2>
+                    <div class="table-responsive">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>Estudiante</th>
+                                    {% for i in range(1, 11) %}
+                                    <th>Sem {{ i }}</th>
+                                    {% endfor %}
+                                    <th>Prom</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for estudiante, notas in estudiantes.gestion.items() %}
+                                <tr>
+                                    <td>{{ estudiante }}</td>
+                                    {% for i in range(10) %}
+                                    <td>
+                                        <input type="text" class="editable editable-comma" 
+                                               data-estudiante="{{ estudiante }}" 
+                                               data-campo="gestion"
+                                               data-indice="{{ i }}"
+                                               value="{{ notas[i]|comma }}"
+                                               step="0.01" min="0" max="20"
+                                               title="Semana {{ i+1 }} (0-20)"
+                                               data-original="{{ notas[i] }}">
+                                        {% if notas[i] > 0 %}
+                                        <span style="font-size: 0.6rem; color: #4CAF50;">✓</span>
+                                        {% endif %}
+                                    </td>
+                                    {% endfor %}
+                                    <td style="font-weight: 600; color: #2196F3;">
+                                        {{ (notas[:10]|select('gt', 0)|list|sum / (notas[:10]|select('gt', 0)|list|length) if (notas[:10]|select('gt', 0)|list|length) > 0 else 0)|comma }}
+                                        <span style="font-size: 0.6rem; color: #999;">
+                                            ({{ notas[:10]|select('gt', 0)|list|length }}/10)
+                                        </span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Sección Quiz -->
+                <div class="section-content" id="section-quiz">
+                    <h2>Notas de Quiz <small style="font-weight: normal; color: #666;">(10 semanas)</small></h2>
+                    <div class="table-responsive">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>Estudiante</th>
+                                    {% for i in range(1, 11) %}
+                                    <th>Q {{ i }}</th>
+                                    {% endfor %}
+                                    <th>Prom</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for estudiante, notas in estudiantes.quiz.items() %}
+                                <tr>
+                                    <td>{{ estudiante }}</td>
+                                    {% for i in range(10) %}
+                                    <td>
+                                        <input type="text" class="editable editable-comma" 
+                                               data-estudiante="{{ estudiante }}" 
+                                               data-campo="quiz"
+                                               data-indice="{{ i }}"
+                                               value="{{ notas[i]|comma }}"
+                                               step="0.01" min="0" max="20"
+                                               title="Quiz {{ i+1 }} (0-20)"
+                                               data-original="{{ notas[i] }}">
+                                        {% if notas[i] > 0 %}
+                                        <span style="font-size: 0.6rem; color: #4CAF50;">✓</span>
+                                        {% endif %}
+                                    </td>
+                                    {% endfor %}
+                                    <td style="font-weight: 600; color: #2196F3;">
+                                        {{ (notas[:10]|select('gt', 0)|list|sum / (notas[:10]|select('gt', 0)|list|length) if (notas[:10]|select('gt', 0)|list|length) > 0 else 0)|comma }}
+                                        <span style="font-size: 0.6rem; color: #999;">
+                                            ({{ notas[:10]|select('gt', 0)|list|length }}/10)
+                                        </span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Sección Informes -->
+                <div class="section-content" id="section-informes">
+                    <h2>Notas de Informes <small style="font-weight: normal; color: #666;">(A-E)</small></h2>
+                    <div class="table-responsive">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>Estudiante</th>
+                                    <th>Inf A</th>
+                                    <th>Inf B</th>
+                                    <th>Inf C</th>
+                                    <th>Inf D</th>
+                                    <th>Inf E</th>
+                                    <th>Suma</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for estudiante, notas in estudiantes.informes.items() %}
+                                <tr>
+                                    <td>{{ estudiante }}</td>
+                                    {% for i in range(5) %}
+                                    <td>
+                                        <input type="text" class="editable editable-comma" 
+                                               data-estudiante="{{ estudiante }}" 
+                                               data-campo="informes"
+                                               data-indice="{{ i }}"
+                                               value="{{ notas[i]|comma }}"
+                                               step="0.01" min="0" max="20"
+                                               title="Informe {{ ['A','B','C','D','E'][i] }} (0-20)"
+                                               data-original="{{ notas[i] }}">
+                                    </td>
+                                    {% endfor %}
+                                    <td style="font-weight: 600; color: #FF9800;">
+                                        {{ notas|sum|comma }}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="admin-actions">
+                <button class="btn-save" id="saveAllBtn"><i class="fas fa-save"></i> Guardar Todos los Cambios</button>
+                <button class="btn-reload" id="reloadDataBtn"><i class="fas fa-sync"></i> Recargar Datos</button>
+                <button class="btn-recalculate" id="recalculateBtn" style="background: #6c757d; color: white; padding: 10px 24px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s;">
+                    <i class="fas fa-calculator"></i> Recalcular Notas
+                </button>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // ============ FUNCIONES DE FORMATO CON COMA ============
+        
+        function formatWithComma(value) {
+            if (value === null || value === undefined || isNaN(value)) {
+                return '0,00';
+            }
+            return Number(value).toFixed(2).replace('.', ',');
+        }
+
+        function parseCommaNumber(value) {
+            if (typeof value === 'string') {
+                const cleanValue = value.replace(',', '.');
+                return parseFloat(cleanValue);
+            }
+            return value;
+        }
+
+        // ============ GUARDAR CAMBIO ============
+        
+        function guardarCambio(element) {
+            const estudiante = element.dataset.estudiante;
+            const campo = element.dataset.campo;
+            const indice = element.dataset.indice;
+            
+            const valorTexto = element.value;
+            const valor = parseCommaNumber(valorTexto);
+            
+            if (isNaN(valor)) {
+                alert('Ingresa un valor numérico válido (ej: 15,5)');
+                element.classList.add('error');
+                element.focus();
+                return;
+            }
+            
+            if (valor < 0 || valor > 20) {
+                alert('La nota debe estar entre 0 y 20');
+                element.classList.add('error');
+                element.focus();
+                return;
+            }
+            
+            element.value = formatWithComma(valor);
+            element.classList.add('success');
+            
+            fetch('/api/actualizar', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    estudiante: estudiante,
+                    campo: campo,
+                    valor: valor,
+                    indice: indice ? parseInt(indice) : null
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    setTimeout(() => {
+                        element.classList.remove('success');
+                        element.value = formatWithComma(valor);
+                    }, 1500);
+                    
+                    // Si se actualizó una nota de componente, recargar para ver cambios
+                    if (['cuaderno', 'gestion', 'quiz', 'informes'].includes(campo) || 
+                        campo === 'bloqueA' || campo === 'bloqueB') {
+                        setTimeout(() => location.reload(), 1000);
+                    }
+                } else {
+                    alert('Error: ' + (data.error || 'No se pudo guardar'));
+                    element.classList.add('error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error al guardar');
+                element.classList.add('error');
+            });
+        }
+
+        // ============ INICIALIZAR INPUTS ============
+        
+        document.querySelectorAll('.editable-comma').forEach(input => {
+            const originalValue = input.dataset.original;
+            if (originalValue !== undefined) {
+                input.value = formatWithComma(originalValue);
+            }
+            
+            input.addEventListener('input', function() {
+                let value = this.value;
+                value = value.replace(/[^0-9,.-]/g, '');
+                value = value.replace('.', ',');
+                const parts = value.split(',');
+                if (parts.length > 2) {
+                    value = parts[0] + ',' + parts.slice(1).join('');
+                }
+                this.value = value;
+                
+                const num = parseCommaNumber(value);
+                if (!isNaN(num) && num >= 0 && num <= 20) {
+                    this.classList.remove('error');
+                    this.classList.add('success');
+                    setTimeout(() => this.classList.remove('success'), 500);
+                } else if (value !== '') {
+                    this.classList.add('error');
+                }
+            });
+            
+            input.addEventListener('blur', function() {
+                const num = parseCommaNumber(this.value);
+                if (!isNaN(num) && num >= 0 && num <= 20) {
+                    this.value = formatWithComma(num);
+                    this.classList.remove('error');
+                } else if (this.value !== '') {
+                    this.classList.add('error');
+                }
+            });
+            
+            input.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    guardarCambio(this);
+                }
+            });
+            
+            input.addEventListener('blur', function() {
+                const original = parseFloat(this.dataset.original);
+                const current = parseCommaNumber(this.value);
+                if (!isNaN(current) && current !== original) {
+                    guardarCambio(this);
+                }
+            });
+        });
+
+        // ============ NAVEGACIÓN POR PESTAÑAS ============
+        
+        document.querySelectorAll('.nav-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                
+                const section = this.dataset.section;
+                document.querySelectorAll('.section-content').forEach(s => s.classList.remove('active'));
+                document.getElementById(`section-${section}`).classList.add('active');
+            });
+        });
+
+        // ============ GUARDAR TODOS LOS CAMBIOS ============
+        
+        document.getElementById('saveAllBtn').addEventListener('click', function() {
+            const inputs = document.querySelectorAll('.editable-comma');
+            let promises = [];
+            let errors = [];
+            
+            inputs.forEach(input => {
+                const valorTexto = input.value;
+                const valor = parseCommaNumber(valorTexto);
+                
+                if (!isNaN(valor) && valor >= 0 && valor <= 20) {
+                    const estudiante = input.dataset.estudiante;
+                    const campo = input.dataset.campo;
+                    const indice = input.dataset.indice;
+                    
+                    promises.push(
+                        fetch('/api/actualizar', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                estudiante: estudiante,
+                                campo: campo,
+                                valor: valor,
+                                indice: indice ? parseInt(indice) : null
+                            })
+                        })
+                    );
+                } else if (valorTexto !== '') {
+                    errors.push('Valor inválido: ' + valorTexto);
+                    input.classList.add('error');
+                }
+            });
+            
+            if (errors.length > 0) {
+                alert('❌ Hay valores inválidos:\n' + errors.join('\n'));
+                return;
+            }
+            
+            if (promises.length === 0) {
+                alert('No hay cambios válidos para guardar');
+                return;
+            }
+            
+            this.textContent = '⏳ Guardando...';
+            this.disabled = true;
+            
+            Promise.all(promises)
+                .then(() => {
+                    alert('✅ ¡Todos los cambios guardados exitosamente!');
+                    location.reload();
+                })
+                .catch(error => {
+                    alert('❌ Error al guardar los cambios');
+                    console.error(error);
+                })
+                .finally(() => {
+                    this.textContent = '💾 Guardar Todos los Cambios';
+                    this.disabled = false;
+                });
+        });
+
+        // ============ RECALCULAR NOTAS ============
+        
+        document.getElementById('recalculateBtn').addEventListener('click', function() {
+            if (!confirm('¿Recalcular todas las notas a partir de los datos actuales?')) {
+                return;
+            }
+            
+            this.textContent = '⏳ Recalculando...';
+            this.disabled = true;
+            
+            fetch('/api/recalcular')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('✅ ' + data.mensaje);
+                        location.reload();
+                    } else {
+                        alert('❌ Error: ' + (data.error || 'No se pudo recalcular'));
+                    }
+                })
+                .catch(error => {
+                    alert('❌ Error al recalcular');
+                    console.error(error);
+                })
+                .finally(() => {
+                    this.textContent = '🔄 Recalcular Notas';
+                    this.disabled = false;
+                });
+        });
+
+        // ============ RECARGAR DATOS ============
+        
+        document.getElementById('reloadDataBtn').addEventListener('click', function() {
+            if (confirm('¿Recargar los datos? Los cambios no guardados se perderán.')) {
+                location.reload();
+            }
+        });
+    </script>
+</body>
+</html>

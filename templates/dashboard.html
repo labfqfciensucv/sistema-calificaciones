@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - {{ estudiante.nombre }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="dashboard-container">
+        <header>
+            <div class="header-content">
+                <h1>📊 Mis Calificaciones</h1>
+                <div class="user-info">
+                    <span>{{ estudiante.nombre }}</span>
+                    <span class="cedula">{{ estudiante.cedula }}</span>
+                    <a href="{{ url_for('logout') }}" class="btn-logout">Cerrar Sesión</a>
+                </div>
+            </div>
+        </header>
+
+        <main>
+            <!-- Nota Final -->
+            <div class="card final-grade">
+                <h2>Nota Final</h2>
+                <div class="grade-display">
+                    <span class="grade-value">{{ estudiante.final|comma }}</span>
+                    <span class="grade-outof">/ 20</span>
+                </div>
+            </div>
+
+            <!-- Bloques -->
+            <div class="blocks-container">
+                <div class="card block-a">
+                    <h3>Bloque A (85%)</h3>
+                    <div class="block-grade">{{ estudiante.bloqueA|comma }}</div>
+                    <div class="block-details">
+                        <span>Cuaderno: {{ estudiante.cuaderno_prom|comma }}</span>
+                        <span>Gestión: {{ estudiante.gestion_prom|comma }}</span>
+                        <span>Quiz: {{ estudiante.quiz_prom|comma }}</span>
+                        <span>Informe: {{ estudiante.informe_sum|comma }}</span>
+                    </div>
+                </div>
+                
+                <div class="card block-b">
+                    <h3>Bloque B (15%)</h3>
+                    <div class="block-grade">{{ estudiante.bloqueB|comma }}</div>
+                    <div class="block-details">
+                        <span>Seminario</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gráfico de evolución - 10 semanas -->
+            <div class="card chart-card">
+                <h3>Evolución de Notas (10 semanas)</h3>
+                <canvas id="evolutionChart"></canvas>
+            </div>
+
+            <!-- Detalle de Componentes -->
+            <div class="card details-card">
+                <h3>Detalle de Componentes</h3>
+                
+                <!-- Indicador de semanas evaluadas -->
+                <div style="margin-bottom: 16px; padding: 12px; background: #f8f9fa; border-radius: 8px;">
+                    <p style="font-size: 0.9rem; color: #666;">
+                        📌 Semanas evaluadas: 
+                        Cuaderno: <strong>{{ estudiante.semanas.cuaderno }}</strong> | 
+                        Gestión: <strong>{{ estudiante.semanas.gestion }}</strong> | 
+                        Quiz: <strong>{{ estudiante.semanas.quiz }}</strong>
+                        <span style="margin-left: 16px; font-size: 0.8rem; color: #999;">
+                            (Total: 10 semanas)
+                        </span>
+                    </p>
+                </div>
+                
+                <div class="component-grid">
+                    <div class="component cuaderno">
+                        <h4>📓 Cuaderno</h4>
+                        <div class="component-details">
+                            {% for i in range(10) %}
+                            <div>
+                                Semana {{ i+1 }}: {{ estudiante.cuaderno[i]|default(0)|comma }}
+                                {% if estudiante.cuaderno[i]|default(0) > 0 %}
+                                <span style="color: #4CAF50;">✅</span>
+                                {% else %}
+                                <span style="color: #ccc;">⬜</span>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                            <div><strong>Promedio: {{ estudiante.cuaderno_prom|comma }}</strong></div>
+                            <div style="color: #666; font-size: 0.8rem;">
+                                Ponderación (20%): {{ (estudiante.cuaderno_prom * 0.20)|comma }}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="component gestion">
+                        <h4>🧪 Gestión de Laboratorio</h4>
+                        <div class="component-details">
+                            {% for i in range(10) %}
+                            <div>
+                                Semana {{ i+1 }}: {{ estudiante.gestion[i]|default(0)|comma }}
+                                {% if estudiante.gestion[i]|default(0) > 0 %}
+                                <span style="color: #4CAF50;">✅</span>
+                                {% else %}
+                                <span style="color: #ccc;">⬜</span>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                            <div><strong>Promedio: {{ estudiante.gestion_prom|comma }}</strong></div>
+                            <div style="color: #666; font-size: 0.8rem;">
+                                Ponderación (15%): {{ (estudiante.gestion_prom * 0.15)|comma }}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="component quiz">
+                        <h4>📝 Quiz</h4>
+                        <div class="component-details">
+                            {% for i in range(10) %}
+                            <div>
+                                Quiz {{ i+1 }}: {{ estudiante.quiz[i]|default(0)|comma }}
+                                {% if estudiante.quiz[i]|default(0) > 0 %}
+                                <span style="color: #4CAF50;">✅</span>
+                                {% else %}
+                                <span style="color: #ccc;">⬜</span>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                            <div><strong>Promedio: {{ estudiante.quiz_prom|comma }}</strong></div>
+                            <div style="color: #666; font-size: 0.8rem;">
+                                Ponderación (25%): {{ (estudiante.quiz_prom * 0.25)|comma }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Informes -->
+                <div style="margin-top: 20px; padding: 16px; background: #f8f9fa; border-radius: 8px;">
+                    <h4>📄 Informes</h4>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 8px;">
+                        <div>Informe A: {{ estudiante.informes[0]|default(0)|comma }}</div>
+                        <div>Informe B: {{ estudiante.informes[1]|default(0)|comma }}</div>
+                        <div>Informe C: {{ estudiante.informes[2]|default(0)|comma }}</div>
+                        <div>Informe D: {{ estudiante.informes[3]|default(0)|comma }}</div>
+                        <div>Informe E: {{ estudiante.informes[4]|default(0)|comma }}</div>
+                    </div>
+                    <div style="margin-top: 8px;">
+                        <strong>Suma total: {{ estudiante.informe_sum|comma }}</strong>
+                        <span style="color: #666; font-size: 0.8rem; margin-left: 16px;">
+                            Ponderación (40%): {{ (estudiante.informe_sum * 0.40)|comma }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <p>Sistema de Consulta de Calificaciones - I-2026</p>
+        </footer>
+    </div>
+
+    <script>
+        // Gráfico de evolución - 10 semanas
+        const ctx = document.getElementById('evolutionChart').getContext('2d');
+        
+        const semanas = ['Sem 1', 'Sem 2', 'Sem 3', 'Sem 4', 'Sem 5', 'Sem 6', 'Sem 7', 'Sem 8', 'Sem 9', 'Sem 10'];
+        const cuadernoData = {{ estudiante.cuaderno|tojson }};
+        const gestionData = {{ estudiante.gestion|tojson }};
+        const quizData = {{ estudiante.quiz|tojson }};
+        
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: semanas,
+                datasets: [
+                    {
+                        label: 'Cuaderno',
+                        data: cuadernoData,
+                        borderColor: '#4CAF50',
+                        backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                        tension: 0.3,
+                        spanGaps: true
+                    },
+                    {
+                        label: 'Gestión de Laboratorio',
+                        data: gestionData,
+                        borderColor: '#2196F3',
+                        backgroundColor: 'rgba(33, 150, 243, 0.1)',
+                        tension: 0.3,
+                        spanGaps: true
+                    },
+                    {
+                        label: 'Quiz',
+                        data: quizData,
+                        borderColor: '#FF9800',
+                        backgroundColor: 'rgba(255, 152, 0, 0.1)',
+                        tension: 0.3,
+                        spanGaps: true
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                let value = context.parsed.y;
+                                let formattedValue = value.toFixed(2).replace('.', ',');
+                                return label + ': ' + formattedValue;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        min: 0,
+                        max: 20,
+                        title: {
+                            display: true,
+                            text: 'Calificación / 20'
+                        },
+                        ticks: {
+                            callback: function(value) {
+                                return value.toFixed(1).replace('.', ',');
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
