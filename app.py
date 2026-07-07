@@ -126,9 +126,14 @@ def calcular_nota_quiz(notas):
     return calcular_promedio_semanas(notas, 10)
 
 def calcular_nota_informe(informe_notas):
+    """Calcula la nota del informe (promedio de todos los informes disponibles)"""
     if not informe_notas:
         return 0
-    return sum(informe_notas)
+    # Filtrar solo informes con nota > 0
+    notas_validas = [n for n in informe_notas if n > 0]
+    if not notas_validas:
+        return 0
+    return sum(notas_validas) / len(notas_validas)
 
 def calcular_nota_bloqueA(cuaderno, gestion, quiz, informe, ponderaciones):
     nota_cuaderno = calcular_nota_cuaderno(cuaderno)
