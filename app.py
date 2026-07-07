@@ -413,13 +413,73 @@ app.jinja_env.filters['comma'] = format_with_comma
 app.jinja_env.filters['comma_auto'] = format_with_comma_auto
 
 # ============ CARGA INICIAL DE DATOS ============
+# ============ CARGA INICIAL DE DATOS ============
 
 DATOS = cargar_datos_excel()
 
-def guardar_datos_json():
-    with open('data/calificaciones.json', 'w', encoding='utf-8') as f:
-        json.dump(DATOS, f, ensure_ascii=False, indent=2)
+# ============ INICIALIZAR ESTRUCTURAS PARA TODOS LOS ESTUDIANTES ============
 
+def inicializar_estructuras_para_todos():
+    """Asegura que cada estudiante tenga datos en todas las secciones"""
+    estudiantes = [USERS[e]['name'] for e in USERS if USERS[e]['role'] == 'student']
+    
+    if not estudiantes:
+        print("⚠️ No hay estudiantes registrados")
+        return
+    
+    for estudiante in estudiantes:
+        # Cuaderno (10 semanas)
+        if estudiante not in DATOS['cuaderno']:
+            DATOS['cuaderno'][estudiante] = [0.0] * 10
+            print(f"  ➕ Inicializado cuaderno para: {estudiante}")
+            
+        # Gestión (10 semanas)
+        if estudiante not in DATOS['gestion']:
+            DATOS['gestion'][estudiante] = [0.0] * 10
+            print(f"  ➕ Inicializado gestión para: {estudiante}")
+            
+        # Quiz (10 semanas)
+        if estudiante not in DATOS['quiz']:
+            DATOS['quiz'][estudiante] = [0.0] * 10
+            print(f"  ➕ Inicializado quiz para: {estudiante}")
+            
+        # Informes (5 informes A-E)
+        if estudiante not in DATOS['informes']:
+            DATOS['informes'][estudiante] = [0.0] * 5
+            print(f"  ➕ Inicializado informes para: {estudiante}")
+            
+        # Bloque A
+        if estudiante not in DATOS['bloqueA']:
+            DATOS['bloqueA'][estudiante] = 0.0
+            
+        # Bloque B
+        if estudiante not in DATOS['bloqueB_raw']:
+            DATOS['bloqueB_raw'][estudiante] = 0.0
+            
+        # Nota Final
+        if estudiante not in DATOS['final']:
+            DATOS['final'][estudiante] = 0.0
+            
+        # Semanas evaluadas
+        if estudiante not in DATOS['semanas_evaluadas']:
+            DATOS['semanas_evaluadas'][estudiante] = {
+                'cuaderno': 0,
+                'gestion': 0,
+                'quiz': 0
+            }
+    
+    print(f"\n✅ Estructuras inicializadas para {len(estudiantes)} estudiantes")
+    print(f"📊 Cuaderno: {len(DATOS['cuaderno'])} estudiantes")
+    print(f"📊 Gestión: {len(DATOS['gestion'])} estudiantes")
+    print(f"📊 Quiz: {len(DATOS['quiz'])} estudiantes")
+    print(f"📊 Informes: {len(DATOS['informes'])} estudiantes")
+    print(f"📊 Bloque A: {len(DATOS['bloqueA'])} estudiantes")
+    print(f"📊 Final: {len(DATOS['final'])} estudiantes")
+
+# Ejecutar la inicialización
+inicializar_estructuras_para_todos()
+
+# Guardar los cambios en JSON
 guardar_datos_json()
 
 # ============ RUTAS PRINCIPALES ============
