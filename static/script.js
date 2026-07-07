@@ -148,4 +148,112 @@ function exportarPDF() {
         html2pdf().set(opt).from(element).save();
     };
 }
+
+// ============ FUNCIONES DE FEEDBACK VISUAL ============
+
+// Sistema de notificaciones tipo toast (versión global)
+function showToast(message, type = 'info') {
+    // Eliminar toasts anteriores
+    const oldToasts = document.querySelectorAll('.toast');
+    oldToasts.forEach(t => t.remove());
+    
+    const colors = {
+        success: '#4CAF50',
+        error: '#f44336',
+        info: '#2196F3',
+        warning: '#FF9800'
+    };
+    
+    const icons = {
+        success: '✅',
+        error: '❌',
+        info: 'ℹ️',
+        warning: '⚠️'
+    };
+    
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.innerHTML = `<span class="toast-icon">${icons[type] || 'ℹ️'}</span> ${message}`;
+    toast.style.cssText = `
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background: ${colors[type] || '#333'};
+        color: white;
+        padding: 16px 24px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        z-index: 9999;
+        font-weight: 500;
+        animation: slideIn 0.3s ease;
+        max-width: 400px;
+    `;
+    
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
+
+// ============ FUNCIONES DE FORMATO CON COMA ============
+
+function formatWithComma(value) {
+    if (value === null || value === undefined || isNaN(value)) {
+        return '0,00';
+    }
+    return Number(value).toFixed(2).replace('.', ',');
+}
+
+function parseCommaNumber(value) {
+    if (typeof value === 'string') {
+        const cleanValue = value.replace(',', '.');
+        return parseFloat(cleanValue);
+    }
+    return value;
+}
+
+// ============ FUNCIÓN PARA RECARGAR ESTADÍSTICAS ============
+
+function recargarEstadisticas() {
+    const statsContainer = document.getElementById('statsContainer');
+    if (statsContainer) {
+        fetch('/api/estadisticas')
+            .then(response => response.json())
+            .then(data => {
+                if (!data.error) {
+                    const promedio = document.getElementById('promedio');
+                    const maxima = document.getElementById('maxima');
+                    const minima = document.getElementById('minima');
+                    const aprobados = document.getElementById('aprobados');
+                    const reprobados = document.getElementById('reprobados');
+                    
+                    if (promedio) promedio.textContent = data.promedio.toFixed(2).replace('.', ',');
+                    if (maxima) maxima.textContent = data.maxima.toFixed(2).replace('.', ',');
+                    if (minima) minima.textContent = data.minima.toFixed(2).replace('.', ',');
+                    if (aprobados) aprobados.textContent = `${data.aprobados}/${data.total}`;
+                    if (reprobados) reprobados.textContent = `${data.reprobados}/${data.total}`;
+                }
+            })
+            .catch(() => {});
+    }
+}
+
+// Agregar estilos para animaciones si no existen
+if (!document.getElementById('toast-styles')) {
+    const style = document.createElement('style');
+    style.id = 'toast-styles';
+    style.textContent = `
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes slideOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+    `;
+    document.head.appendChild(style);
+}
 });
