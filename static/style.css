@@ -364,9 +364,9 @@ footer {
 }
 
 .admin-table input[type="text"].editable-comma {
-    width: 95px;
-    padding: 10px 12px;
-    font-size: 1.05rem;
+    width: 85px;
+    padding: 8px 10px;
+    font-size: 1rem;
     font-weight: 600;
     text-align: center;
     border: 2px solid #e0e0e0;
@@ -400,6 +400,17 @@ footer {
     background: #f0faf0 !important;
 }
 
+.admin-table input[type="text"].editable-comma.loading {
+    border-color: #FF9800 !important;
+    background: #fff8e1 !important;
+    animation: pulse 1s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+}
+
 .final-grade {
     font-weight: 700;
     font-size: 1.1rem;
@@ -418,13 +429,17 @@ footer {
     box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
 
-.btn-save, .btn-reload {
+.btn-save, .btn-reload, .btn-export, .btn-import, .btn-recalculate {
     padding: 10px 24px;
     border: none;
     border-radius: 8px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
 }
 
 .btn-save {
@@ -452,49 +467,55 @@ footer {
     background: #dee2e6;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-    .header-content {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-    
-    .user-info {
-        flex-wrap: wrap;
-    }
-    
-    .blocks-container {
-        grid-template-columns: 1fr;
-    }
-    
-    .component-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .admin-nav {
-        flex-direction: column;
-    }
-    
-    .admin-table input[type="text"].editable-comma {
-        width: 65px;
-        padding: 6px 8px;
-        font-size: 0.85rem;
-    }
-    
-    .admin-table td {
-        min-width: 60px;
-        padding: 4px 6px;
-    }
-    
-    .admin-table td:first-child {
-        font-size: 0.8rem;
-        min-width: 100px;
-    }
-    
-    .login-box {
-        margin: 16px;
-        padding: 24px;
-    }
+.btn-export {
+    background: #2196F3;
+    color: white;
+}
+
+.btn-export:hover {
+    background: #1976D2;
+    transform: translateY(-2px);
+}
+
+.btn-import {
+    background: #9C27B0;
+    color: white;
+}
+
+.btn-import:hover {
+    background: #7B1FA2;
+    transform: translateY(-2px);
+}
+
+.btn-recalculate {
+    background: #6c757d;
+    color: white;
+}
+
+.btn-recalculate:hover {
+    background: #5a6268;
+    transform: translateY(-2px);
+}
+
+.btn-export-pdf {
+    background: #f44336;
+    color: white;
+}
+
+.btn-export-pdf:hover {
+    background: #d32f2f;
+    transform: translateY(-2px);
+}
+
+.btn-export-print {
+    background: #607d8b;
+    color: white;
+}
+
+.btn-export-print:hover {
+    background: #455a64;
+    transform: translateY(-2px);
+}
 
 /* ============ ESTADÍSTICAS ============ */
 
@@ -506,11 +527,11 @@ footer {
 }
 
 .stat-card {
-    background: var(--bg-secondary, white);
+    background: white;
     padding: 20px;
     border-radius: 12px;
     text-align: center;
-    box-shadow: var(--card-shadow, 0 2px 8px rgba(0,0,0,0.08));
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
     transition: transform 0.2s;
 }
 
@@ -541,18 +562,17 @@ footer {
 .stat-label {
     display: block;
     font-size: 0.85rem;
-    color: var(--text-secondary, #666);
+    color: #666;
     margin-top: 4px;
 }
 
-/* Distribución de notas */
 .distribucion-container {
     display: flex;
     gap: 8px;
     align-items: flex-end;
     height: 120px;
     padding: 16px;
-    background: var(--bg-secondary, white);
+    background: #f8f9fa;
     border-radius: 12px;
     margin-top: 16px;
 }
@@ -569,34 +589,21 @@ footer {
 .barra {
     width: 100%;
     max-width: 40px;
-    background: linear-gradient(180deg, #667eea, #764ba2);
     border-radius: 4px 4px 0 0;
     min-height: 4px;
     transition: height 0.5s ease;
+    background: linear-gradient(180deg, #667eea, #764ba2);
 }
 
 .barra-label {
     font-size: 0.7rem;
-    color: var(--text-secondary, #666);
+    color: #666;
     margin-top: 4px;
     text-align: center;
 }
 
-/* ============ FEEDBACK VISUAL ============ */
+/* ============ TOAST ============ */
 
-/* Input loading */
-.admin-table input[type="text"].editable-comma.loading {
-    border-color: #FF9800 !important;
-    background: #fff8e1 !important;
-    animation: pulse 1s ease-in-out infinite;
-}
-
-@keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.6; }
-}
-
-/* Toast notifications */
 .toast-container {
     position: fixed;
     bottom: 20px;
@@ -639,54 +646,57 @@ footer {
     to { transform: translateX(100%); opacity: 0; }
 }
 
-/* ============ BOTONES DE EXPORTACIÓN ============ */
-
-.btn-export {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 8px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s;
-    font-size: 0.9rem;
-}
-
-.btn-export-pdf {
-    background: #f44336;
-    color: white;
-}
-
-.btn-export-pdf:hover {
-    background: #d32f2f;
-    transform: translateY(-2px);
-}
-
-.btn-export-print {
-    background: #607d8b;
-    color: white;
-}
-
-.btn-export-print:hover {
-    background: #455a64;
-    transform: translateY(-2px);
-}
-
-.admin-actions .btn-export {
-    background: #2196F3;
-    color: white;
-}
-
-.admin-actions .btn-export:hover {
-    background: #1976D2;
-    transform: translateY(-2px);
-}
-
-/* ============ RESPONSIVE PARA ESTADÍSTICAS ============ */
+/* ============ RESPONSIVE ============ */
 
 @media (max-width: 768px) {
+    .header-content {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .user-info {
+        flex-wrap: wrap;
+    }
+    
+    .blocks-container {
+        grid-template-columns: 1fr;
+    }
+    
+    .component-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .admin-nav {
+        flex-direction: column;
+    }
+    
+    .admin-table input[type="text"].editable-comma {
+        width: 60px;
+        padding: 4px 6px;
+        font-size: 0.8rem;
+    }
+    
+    .admin-table td {
+        padding: 4px 6px;
+        min-width: 40px;
+        font-size: 0.75rem;
+    }
+    
+    .admin-table td:first-child {
+        font-size: 0.75rem;
+        min-width: 80px;
+    }
+    
+    .admin-table th {
+        padding: 6px 4px;
+        font-size: 0.7rem;
+    }
+    
+    .login-box {
+        margin: 16px;
+        padding: 24px;
+    }
+    
     .stats-container {
         grid-template-columns: repeat(2, 1fr);
         gap: 12px;
@@ -704,5 +714,17 @@ footer {
         height: 80px;
         padding: 12px;
     }
-}
+    
+    .admin-actions {
+        flex-direction: column;
+    }
+    
+    .admin-actions .btn-save,
+    .admin-actions .btn-reload,
+    .admin-actions .btn-export,
+    .admin-actions .btn-import,
+    .admin-actions .btn-recalculate {
+        width: 100%;
+        justify-content: center;
+    }
 }
