@@ -266,39 +266,43 @@
                     <h2>Notas de Informes <small style="font-weight: normal; color: #666;">(A-E)</small></h2>
                     <div class="table-responsive">
                         <table class="admin-table">
-                            <thead>
-                                <tr>
-                                    <th>Estudiante</th>
-                                    <th>Inf A</th>
-                                    <th>Inf B</th>
-                                    <th>Inf C</th>
-                                    <th>Inf D</th>
-                                    <th>Inf E</th>
-                                    <th>Suma</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for estudiante, notas in estudiantes.informes.items() %}
-                                <tr>
-                                    <td>{{ estudiante }}</td>
-                                    {% for i in range(5) %}
-                                    <td>
-                                        <input type="text" class="editable editable-comma" 
-                                               data-estudiante="{{ estudiante }}" 
-                                               data-campo="informes"
-                                               data-indice="{{ i }}"
-                                               value="{{ notas[i]|comma }}"
-                                               step="0.01" min="0" max="20"
-                                               title="Informe {{ ['A','B','C','D','E'][i] }} (0-20)"
-                                               data-original="{{ notas[i] }}">
-                                    </td>
-                                    {% endfor %}
-                                    <td style="font-weight: 600; color: #FF9800;">
-                                        {{ notas|sum|comma }}
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
+                            <!-- En la sección de Informes -->
+<thead>
+    <tr>
+        <th>Estudiante</th>
+        <th>Inf A</th>
+        <th>Inf B</th>
+        <th>Inf C</th>
+        <th>Inf D</th>
+        <th>Inf E</th>
+        <th>Promedio</th>  <!-- Cambiado de "Suma" a "Promedio" -->
+    </tr>
+</thead>
+<tbody>
+    {% for estudiante, notas in estudiantes.informes.items() %}
+    <tr>
+        <td>{{ estudiante }}</td>
+        {% for i in range(5) %}
+        <td>
+            <input type="text" class="editable editable-comma" 
+                   data-estudiante="{{ estudiante }}" 
+                   data-campo="informes"
+                   data-indice="{{ i }}"
+                   value="{{ notas[i]|comma }}"
+                   step="0.01" min="0" max="20"
+                   title="Informe {{ ['A','B','C','D','E'][i] }} (0-20)"
+                   data-original="{{ notas[i] }}">
+        </td>
+        {% endfor %}
+        <td style="font-weight: 600; color: #FF9800;">
+            {{ (notas[:5]|select('gt', 0)|list|sum / (notas[:5]|select('gt', 0)|list|length) if (notas[:5]|select('gt', 0)|list|length) > 0 else 0)|comma }}
+            <span style="font-size: 0.6rem; color: #999;">
+                ({{ notas[:5]|select('gt', 0)|list|length }}/5)
+            </span>
+        </td>
+    </tr>
+    {% endfor %}
+</tbody>
                         </table>
                     </div>
                 </div>
