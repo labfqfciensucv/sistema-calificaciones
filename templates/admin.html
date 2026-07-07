@@ -439,12 +439,10 @@
             </div>
 
             <div class="admin-actions">
-                <button class="btn-save" id="saveAllBtn"><i class="fas fa-save"></i> Guardar Todos los Cambios</button>
-                <button class="btn-reload" id="reloadDataBtn"><i class="fas fa-sync"></i> Recargar Datos</button>
-                <button class="btn-recalculate" id="recalculateBtn" style="background: #6c757d; color: white; padding: 10px 24px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s;">
-                    <i class="fas fa-calculator"></i> Recalcular Notas
-                </button>
-            </div>
+    <button class="btn-save" id="saveAllBtn"><i class="fas fa-save"></i> Guardar Todos los Cambios</button>
+    <button class="btn-reload" id="reloadDataBtn"><i class="fas fa-sync"></i> Recargar Datos</button>
+    <button class="btn-export" id="exportExcelBtn"><i class="fas fa-file-excel"></i> Exportar Excel</button>
+</div>
         </main>
     </div>
 
@@ -698,6 +696,280 @@
                 location.reload();
             }
         });
+
+        // ============ FUNCIONES DE ESTADÍSTICAS ============
+
+function cargarEstadisticas() {
+    fetch('/api/estadisticas')
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                console.error('Error:', data.error);
+                return;
+            }
+            
+            // Actualizar estadísticas
+            document.getElementById('promedio').textContent = data.promedio.toFixed(2).replace('.', ',');
+            document.getElementById('maxima').textContent = data.maxima.toFixed(2).replace('.', ',');
+            document.getElementById('minima').textContent = data.minima.toFixed(2).replace('.', ',');
+            document.getElementById('aprobados').textContent = `${data.aprobados}/${data.total}`;
+            document.getElementById('reprobados').textContent = `${data.reprobados}/${data.total}`;
+            
+            // Actualizar distribución
+            const total = data.total || 1;
+            const colores = ['#f44336', '#FF9800', '#4CAF50', '#2196F3', '#9C27B0'];
+            
+            data.distribucion.forEach((valor, index) => {
+                const porcentaje = (valor / total) * 100;
+                const barra = document.getElementById(`barra-${index}`);
+                if (barra) {
+                    barra.style.height = `${Math.max(porcentaje, 5)}%`;
+                    barra.style.background = colores[index] || '#667eea';
+                    // Mostrar cantidad en la barra
+                    barra.title = `${valor} estudiante${valor !== 1 ? 's' : ''}`;
+                }
+            });
+        })
+        .catch(error => console.error('Error al cargar estadísticas:', error));
+}
+
+// ============ EXPORTAR A EXCEL ============
+
+document.getElementById('exportExcelBtn').addEventListener('click', function() {
+    fetch('/api/estadisticas')
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                showToast('❌ ' + data.error, 'error');
+                return;
+            }
+            
+            // Crear contenido CSV
+            let csv = '\uFEFF'; // BOM para caracteres UTF-8 en Excel
+            csv += 'Estudiante;Bloque A;Bloque B;Nota Final\n';
+            
+            data.estudiantes.forEach(est => {
+                csv += `${est.nombre};${est.bloqueA.toString().replace('.', ',')};${est.bloqueB.toString().replace('.', ',')};${est.nota.toString().replace('.', ',')}\n`;
+            });
+            
+            // Agregar estadísticas al final
+            csv += '\n;ESTADÍSTICAS;\n';
+            csv += `Promedio;${data.promedio.toString().replace('.', ',')};\n`;
+            csv += `Nota Máxima;${data.maxima.toString().replace('.', ',')};\n`;
+            csv += `Nota Mínima;${data.minima.toString().replace('.', ',')};\n`;
+            csv += `Aprobados;${data.aprobados}/${data.total};\n`;
+            csv += `Reprobados;${data.reprobados}/${data.total};\n`;
+            
+            // Descargar archivo
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `calificaciones_${new Date().toLocaleDateString()}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showToast('✅ Excel exportado correctamente', 'success');
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showToast('❌ Error al exportar', 'error');
+        });
+});
+
+// ============ FUNCIONES DE FEEDBACK VISUAL ============
+
+// Sistema de notificaciones tipo toast
+function showToast(message, type = 'info') {
+    // Eliminar toasts anteriores
+    const oldToasts = document.querySelectorAll('.toast');
+    oldToasts.forEach(t => t.remove());
+    
+    const colors = {
+        success: '#4CAF50',
+        error: '#f44336',
+        info: '#2196F3',
+        warning: '#FF9800'
+    };
+    
+    const icons = {
+        success: '✅',
+        error: '❌',
+        info: 'ℹ️',
+        warning: '⚠️'
+    };
+    
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.innerHTML = `<span class="toast-icon">${icons[type] || 'ℹ️'}</span> ${message}`;
+    toast.style.cssText = `
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background: ${colors[type] || '#333'};
+        color: white;
+        padding: 16px 24px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        z-index: 9999;
+        font-weight: 500;
+        animation: slideIn 0.3s ease;
+        max-width: 400px;
+    `;
+    
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
+
+// ============ FUNCIONES DE EXPORTACIÓN PARA EL DASHBOARD ============
+
+function exportarPDF() {
+    showToast('📄 Generando PDF...', 'info');
+    
+    // Cargar html2pdf.js si no está cargado
+    if (typeof html2pdf === 'undefined') {
+        const script = document.createElement('script');
+        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
+        document.head.appendChild(script);
+        
+        script.onload = function() {
+            generarPDF();
+        };
+    } else {
+        generarPDF();
+    }
+}
+
+function generarPDF() {
+    const element = document.querySelector('main');
+    const nombre = document.querySelector('.user-info span:first-child')?.textContent || 'estudiante';
+    
+    const opt = {
+        margin: 10,
+        filename: `Notas_${nombre}_${new Date().toLocaleDateString()}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { 
+            scale: 2, 
+            useCORS: true,
+            backgroundColor: '#ffffff'
+        },
+        jsPDF: { 
+            unit: 'mm', 
+            format: 'a4', 
+            orientation: 'portrait' 
+        }
+    };
+    
+    html2pdf().set(opt).from(element).save()
+        .then(() => {
+            showToast('✅ PDF generado correctamente', 'success');
+        })
+        .catch(() => {
+            showToast('❌ Error al generar PDF', 'error');
+        });
+}
+
+// ============ INICIALIZACIÓN ============
+
+// Cargar estadísticas al iniciar
+document.addEventListener('DOMContentLoaded', function() {
+    cargarEstadisticas();
+    
+    // Recargar estadísticas cada 30 segundos
+    setInterval(cargarEstadisticas, 30000);
+});
+
+// ============ SOBRESCRIBIR GUARDAR CAMBIO CON FEEDBACK ============
+
+// Esta función reemplaza la función guardarCambio existente
+// con una versión mejorada que incluye feedback visual
+
+// Guardar la función original si existe
+const originalGuardarCambio = window.guardarCambio || function() {};
+
+// Nueva función mejorada
+function guardarCambioConFeedback(element) {
+    const estudiante = element.dataset.estudiante;
+    const campo = element.dataset.campo;
+    const indice = element.dataset.indice;
+    
+    const valorTexto = element.value;
+    const valor = parseCommaNumber(valorTexto);
+    
+    if (isNaN(valor)) {
+        showToast('❌ Ingresa un valor numérico válido (ej: 15,5)', 'error');
+        element.classList.add('error');
+        element.focus();
+        return;
+    }
+    
+    if (valor < 0 || valor > 20) {
+        showToast('❌ La nota debe estar entre 0 y 20', 'error');
+        element.classList.add('error');
+        element.focus();
+        return;
+    }
+    
+    // Mostrar estado de carga
+    element.value = formatWithComma(valor);
+    element.classList.add('loading');
+    showToast('💾 Guardando...', 'info');
+    
+    fetch('/api/actualizar', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            estudiante: estudiante,
+            campo: campo,
+            valor: valor,
+            indice: indice ? parseInt(indice) : null
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        element.classList.remove('loading');
+        
+        if (data.success) {
+            element.classList.add('success');
+            showToast('✅ ¡Guardado exitosamente!', 'success');
+            
+            // Actualizar estadísticas si se modificó una nota
+            if (['cuaderno', 'gestion', 'quiz', 'informes', 'bloqueA', 'bloqueB'].includes(campo)) {
+                setTimeout(cargarEstadisticas, 500);
+            }
+            
+            setTimeout(() => {
+                element.classList.remove('success');
+                element.value = formatWithComma(valor);
+            }, 2000);
+            
+            // Si se actualizó Bloque A o B, recargar para ver cambios
+            if (campo === 'bloqueA' || campo === 'bloqueB') {
+                setTimeout(() => location.reload(), 1500);
+            }
+        } else {
+            element.classList.add('error');
+            showToast('❌ Error: ' + (data.error || 'No se pudo guardar'), 'error');
+        }
+    })
+    .catch(error => {
+        element.classList.remove('loading');
+        element.classList.add('error');
+        showToast('❌ Error al guardar', 'error');
+        console.error('Error:', error);
+    });
+}
+
+// Reemplazar la función guardarCambio
+window.guardarCambio = guardarCambioConFeedback;
     </script>
 </body>
 </html>
