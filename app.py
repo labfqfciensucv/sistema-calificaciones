@@ -710,24 +710,79 @@ def api_recalcular():
         return jsonify({'success': True, 'mensaje': 'Notas recalculadas correctamente'})
     except Exception as e:
         return jsonify({'error': str(e)}), 400
+# ============ ENDPOINT PARA ESTADÍSTICAS ============
 
 @app.route('/api/estadisticas')
 @login_required
 @admin_required
 def api_estadisticas():
-    """Retorna estadísticas del curso"""
-    notas = DATOS['final'].values()
-    
-    estadisticas = {
-        'promedio': round(sum(notas) / len(notas), 2) if notas else 0,
-        'maxima': max(notas) if notas else 0,
-        'minima': min(notas) if notas else 0,
-        'aprobados': len([n for n in notas if n >= 10]),  # Base 20
-        'reprobados': len([n for n in notas if n < 10]),
-        'total': len(notas)
-    }
-    
-    return jsonify(estadisticas)
+    """Retorna estadísticas del curso para el panel de administración"""
+    try:
+        notas_finales = list(DATOS['final'].values())
+        estudiantes_nombres = list(DATOS['final'].keys())
+        
+        if not notas_finales:
+            return jsonify({
+                'promedio': 0,
+                'maxima': 0,
+                'minima': 0,
+                'aprobados': 0,
+                'reprobados': 0,
+                'total': 0,
+                'distribucion': [0, 0, 0, 0, 0],
+                'estudiantes': []
+            })
+        
+        # Estadísticas básicas
+        promedio = round(sum(notas_finales) / len(notas_finales), 2)
+        maxima = round(max(notas_finales), 2)
+        minima = round(min(notas_finales), 2)
+        
+        # Aprobados/Reprobados (base 20, nota mínima aprobatoria 10)
+        aprobados = len([n for n in notas_finales if n >= 10])
+        reprobados = len([n for n in notas_finales if n < 10])
+        
+        # Distribución de notas (rangos en base 20)
+        # [0-4, 5-9, 10-14, 15-17, 18-20]
+        distribucion = [0, 0, 0, 0, 0]
+        for nota in notas_finales:
+            if nota < 5:
+                distribucion[0] += 1
+            elif nota < 10:
+                distribucion[1] += 1
+            elif nota < 15:
+                distribucion[2] += 1
+            elif nota < 18:
+                distribucion[3] += 1
+            else:
+                distribucion[4] += 1
+        
+        # Lista de estudiantes con sus notas
+        estudiantes = []
+        for nombre, nota in DATOS['final'].items():
+            bloqueA = DATOS['bloqueA'].get(nombre, 0)
+            bloqueB = DATOS['bloqueB_raw'].get(nombre, 0)
+            estudiantes.append({
+                'nombre': nombre,
+                'nota': round(nota, 2),
+                'bloqueA': round(bloqueA, 2),
+                'bloqueB': round(bloqueB, 2)
+            })
+        
+        return jsonify({
+            'promedio': promedio,
+            'maxima': maxima,
+            'minima': minima,
+            'aprobados': aprobados,
+            'reprobados': reprobados,
+            'total': len(notas_finales),
+            'distribucion': distribucion,
+            'estudiantes': estudiantes
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+# ============ FIN ENDPOINT ESTADÍSTICAS ============
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
