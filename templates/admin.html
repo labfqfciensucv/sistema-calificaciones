@@ -145,6 +145,42 @@
                 <button class="nav-btn" data-section="informes">📄 Informes</button>
             </div>
 
+            <!-- Agregar después de la navegación -->
+<div class="stats-container" id="statsContainer">
+    <div class="stat-card">
+        <span class="stat-value" id="promedio">-</span>
+        <span class="stat-label">Promedio</span>
+    </div>
+    <div class="stat-card">
+        <span class="stat-value" id="maxima">-</span>
+        <span class="stat-label">Nota Máxima</span>
+    </div>
+    <div class="stat-card">
+        <span class="stat-value" id="minima">-</span>
+        <span class="stat-label">Nota Mínima</span>
+    </div>
+    <div class="stat-card">
+        <span class="stat-value" id="aprobados">-</span>
+        <span class="stat-label">Aprobados</span>
+    </div>
+</div>
+
+<script>
+// Cargar estadísticas al iniciar
+function cargarEstadisticas() {
+    fetch('/api/estadisticas')
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('promedio').textContent = data.promedio.toFixed(2).replace('.', ',');
+            document.getElementById('maxima').textContent = data.maxima.toFixed(2).replace('.', ',');
+            document.getElementById('minima').textContent = data.minima.toFixed(2).replace('.', ',');
+            document.getElementById('aprobados').textContent = `${data.aprobados}/${data.total}`;
+        });
+}
+
+document.addEventListener('DOMContentLoaded', cargarEstadisticas);
+</script>
+
             <div id="admin-content">
                 <!-- Sección General -->
                 <div class="section-content active" id="section-general">
