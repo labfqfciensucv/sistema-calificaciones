@@ -47,4 +47,86 @@ document.addEventListener('DOMContentLoaded', function() {
         exportBtn.onclick = exportarDatos;
         adminActions.appendChild(exportBtn);
     }
+// Función mejorada de guardar con feedback visual
+function guardarCambio(element) {
+    const estudiante = element.dataset.estudiante;
+    const campo = element.dataset.campo;
+    const indice = element.dataset.indice;
+    
+    const valorTexto = element.value;
+    const valor = parseCommaNumber(valorTexto);
+    
+    if (isNaN(valor) || valor < 0 || valor > 20) {
+        element.classList.add('error');
+        showToast('❌ Nota inválida (debe ser 0-20)', 'error');
+        return;
+    }
+    
+    // Mostrar indicador de carga
+    element.classList.add('loading');
+    showToast('💾 Guardando...', 'info');
+    
+    fetch('/api/actualizar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            estudiante: estudiante,
+            campo: campo,
+            valor: valor,
+            indice: indice ? parseInt(indice) : null
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        element.classList.remove('loading');
+        
+        if (data.success) {
+            element.classList.add('success');
+            showToast('✅ ¡Guardado exitosamente!', 'success');
+            setTimeout(() => element.classList.remove('success'), 2000);
+        } else {
+            element.classList.add('error');
+            showToast('❌ Error: ' + data.error, 'error');
+        }
+    })
+    .catch(error => {
+        element.classList.remove('loading');
+        element.classList.add('error');
+        showToast('❌ Error al guardar', 'error');
+    });
+}
+
+// Sistema de notificaciones tipo toast
+function showToast(message, type = 'info') {
+    const colors = {
+        success: '#4CAF50',
+        error: '#f44336',
+        info: '#2196F3',
+        warning: '#FF9800'
+    };
+    
+    const toast = document.createElement('div');
+    toast.style.cssText = `
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background: ${colors[type]};
+        color: white;
+        padding: 16px 24px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        z-index: 9999;
+        font-weight: 500;
+        animation: slideIn 0.3s ease;
+        max-width: 400px;
+    `;
+    toast.textContent = message;
+    
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
 });
