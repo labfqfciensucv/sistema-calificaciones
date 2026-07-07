@@ -145,22 +145,23 @@
                 </div>
                 
                 <!-- Informes -->
-                <div style="margin-top: 20px; padding: 16px; background: #f8f9fa; border-radius: 8px;">
-                    <h4>📄 Informes</h4>
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 8px;">
-                        <div>Informe A: {{ estudiante.informes[0]|default(0)|comma }}</div>
-                        <div>Informe B: {{ estudiante.informes[1]|default(0)|comma }}</div>
-                        <div>Informe C: {{ estudiante.informes[2]|default(0)|comma }}</div>
-                        <div>Informe D: {{ estudiante.informes[3]|default(0)|comma }}</div>
-                        <div>Informe E: {{ estudiante.informes[4]|default(0)|comma }}</div>
-                    </div>
-                    <div style="margin-top: 8px;">
-                        <strong>Suma total: {{ estudiante.informe_sum|comma }}</strong>
-                        <span style="color: #666; font-size: 0.8rem; margin-left: 16px;">
-                            Ponderación (40%): {{ (estudiante.informe_sum * 0.40)|comma }}
-                        </span>
-                    </div>
-                </div>
+                <!-- En la sección de Informes del dashboard -->
+<div style="margin-top: 20px; padding: 16px; background: #f8f9fa; border-radius: 8px;">
+    <h4>📄 Informes</h4>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 8px;">
+        <div>Informe A: {{ estudiante.informes[0]|default(0)|comma }}</div>
+        <div>Informe B: {{ estudiante.informes[1]|default(0)|comma }}</div>
+        <div>Informe C: {{ estudiante.informes[2]|default(0)|comma }}</div>
+        <div>Informe D: {{ estudiante.informes[3]|default(0)|comma }}</div>
+        <div>Informe E: {{ estudiante.informes[4]|default(0)|comma }}</div>
+    </div>
+    <div style="margin-top: 8px;">
+        <strong>Promedio: {{ estudiante.informe_prom|comma }}</strong>
+        <span style="color: #666; font-size: 0.8rem; margin-left: 16px;">
+            Ponderación (40%): {{ (estudiante.informe_prom * 0.40)|comma }}
+        </span>
+    </div>
+</div>
             </div>
         </main>
 
