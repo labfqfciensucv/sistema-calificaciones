@@ -711,5 +711,23 @@ def api_recalcular():
     except Exception as e:
         return jsonify({'error': str(e)}), 400
 
+@app.route('/api/estadisticas')
+@login_required
+@admin_required
+def api_estadisticas():
+    """Retorna estadísticas del curso"""
+    notas = DATOS['final'].values()
+    
+    estadisticas = {
+        'promedio': round(sum(notas) / len(notas), 2) if notas else 0,
+        'maxima': max(notas) if notas else 0,
+        'minima': min(notas) if notas else 0,
+        'aprobados': len([n for n in notas if n >= 10]),  # Base 20
+        'reprobados': len([n for n in notas if n < 10]),
+        'total': len(notas)
+    }
+    
+    return jsonify(estadisticas)
+
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
