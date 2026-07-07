@@ -6,123 +6,6 @@
     <title>Panel de Administración</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        .admin-table input[type="text"].editable-comma {
-            width: 75px;
-            padding: 8px 10px;
-            font-size: 0.95rem;
-            font-weight: 600;
-            text-align: center;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            background: white;
-            transition: all 0.3s ease;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            direction: ltr;
-            unicode-bidi: plaintext;
-        }
-        
-        .admin-table input[type="text"].editable-comma:focus {
-            border-color: #667eea;
-            background: #f8f9ff;
-            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15);
-            transform: scale(1.05);
-        }
-        
-        .admin-table input[type="text"].editable-comma:hover {
-            border-color: #999;
-            background: #fafafa;
-        }
-        
-        .admin-table input[type="text"].editable-comma.error {
-            border-color: #f44336 !important;
-            background: #fff5f5 !important;
-        }
-        
-        .admin-table input[type="text"].editable-comma.success {
-            border-color: #4CAF50 !important;
-            background: #f0faf0 !important;
-        }
-        
-        .admin-table td {
-            padding: 6px 8px;
-            min-width: 60px;
-            font-variant-numeric: tabular-nums;
-            font-size: 0.85rem;
-        }
-        
-        .admin-table th {
-            padding: 10px 12px;
-            font-size: 0.8rem;
-            white-space: nowrap;
-        }
-        
-        .admin-table td:first-child {
-            font-weight: 700;
-            font-size: 0.85rem;
-            min-width: 150px;
-            color: #2c3e50;
-        }
-        
-        .final-grade {
-            font-weight: 700;
-            font-size: 1rem;
-            color: #4CAF50;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        
-        .semana-evaluada {
-            color: #4CAF50;
-        }
-        
-        .semana-no-evaluada {
-            color: #ccc;
-        }
-        
-        .badge {
-            display: inline-block;
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-size: 0.7rem;
-            font-weight: 600;
-        }
-        
-        .badge-success {
-            background: #d4edda;
-            color: #155724;
-        }
-        
-        .badge-warning {
-            background: #fff3cd;
-            color: #856404;
-        }
-        
-        .badge-info {
-            background: #d1ecf1;
-            color: #0c5460;
-        }
-        
-        @media (max-width: 768px) {
-            .admin-table input[type="text"].editable-comma {
-                width: 50px;
-                padding: 4px 6px;
-                font-size: 0.75rem;
-            }
-            .admin-table td {
-                padding: 4px 4px;
-                min-width: 40px;
-                font-size: 0.7rem;
-            }
-            .admin-table td:first-child {
-                font-size: 0.7rem;
-                min-width: 80px;
-            }
-            .admin-table th {
-                padding: 6px 4px;
-                font-size: 0.65rem;
-            }
-        }
-    </style>
 </head>
 <body>
     <div class="admin-container">
@@ -145,7 +28,7 @@
                 <button class="nav-btn" data-section="informes">📄 Informes</button>
             </div>
 
-           <!-- ====== PANEL DE ESTADÍSTICAS ====== -->
+            <!-- ====== PANEL DE ESTADÍSTICAS ====== -->
             <div class="stats-container" id="statsContainer">
                 <div class="stat-card">
                     <span class="stat-value" id="promedio">-</span>
@@ -168,7 +51,7 @@
                     <span class="stat-label">❌ Reprobados</span>
                 </div>
             </div>
-            
+
             <!-- ====== DISTRIBUCIÓN DE NOTAS ====== -->
             <div class="card" style="margin-bottom: 24px;">
                 <h3>📊 Distribución de Notas</h3>
@@ -195,23 +78,11 @@
                     </div>
                 </div>
             </div>
-            <!-- ====== FIN PANEL DE ESTADÍSTICAS ====== -->
 
             <div id="admin-content">
                 <!-- Sección General -->
                 <div class="section-content active" id="section-general">
                     <h2>Notas Generales <small style="font-weight: normal; color: #666;">(Base 20 - 10 semanas)</small></h2>
-                    <div style="margin-bottom: 16px; padding: 12px; background: #f8f9fa; border-radius: 8px; font-size: 0.9rem;">
-                        <span>✅ Semanas evaluadas: </span>
-                        {% for estudiante, semanas in estudiantes.semanas_evaluadas.items() %}
-                        <span style="margin-right: 16px;">
-                            {{ estudiante.split()[0] }}: 
-                            <span class="badge badge-success">{{ semanas.cuaderno }}</span> |
-                            <span class="badge badge-info">{{ semanas.gestion }}</span> |
-                            <span class="badge badge-warning">{{ semanas.quiz }}</span>
-                        </span>
-                        {% endfor %}
-                    </div>
                     <div class="table-responsive">
                         <table class="admin-table">
                             <thead>
@@ -220,7 +91,6 @@
                                     <th>Bloque A (85%)</th>
                                     <th>Bloque B (15%)</th>
                                     <th>Nota Final</th>
-                                    <th>Detalle</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -246,10 +116,6 @@
                                                data-original="{{ estudiantes.bloqueB_raw[estudiante] }}">
                                     </td>
                                     <td class="final-grade">{{ final|comma }}</td>
-                                    <td style="font-size: 0.75rem; color: #666;">
-                                        {{ estudiantes.bloqueA[estudiante]|comma }} × 0,85 + 
-                                        {{ estudiantes.bloqueB_raw[estudiante]|comma }} × 0,15
-                                    </td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
@@ -439,10 +305,16 @@
             </div>
 
             <div class="admin-actions">
-    <button class="btn-save" id="saveAllBtn"><i class="fas fa-save"></i> Guardar Todos los Cambios</button>
-    <button class="btn-reload" id="reloadDataBtn"><i class="fas fa-sync"></i> Recargar Datos</button>
-    <button class="btn-export" id="exportExcelBtn"><i class="fas fa-file-excel"></i> Exportar Excel</button>
-</div>
+                <button class="btn-save" id="saveAllBtn"><i class="fas fa-save"></i> Guardar Todos los Cambios</button>
+                <button class="btn-reload" id="reloadDataBtn"><i class="fas fa-sync"></i> Recargar Datos</button>
+                <button class="btn-export" id="exportExcelBtn"><i class="fas fa-file-excel"></i> Exportar Excel</button>
+                <a href="{{ url_for('cargar_listado') }}" class="btn-import" style="background: #9C27B0; color: white; padding: 10px 24px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s; text-decoration: none; display: inline-flex; align-items: center; gap: 8px;">
+                    <i class="fas fa-file-import"></i> Importar Listado
+                </a>
+                <button class="btn-recalculate" id="recalculateBtn" style="background: #6c757d; color: white; padding: 10px 24px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s;">
+                    <i class="fas fa-calculator"></i> Recalcular Notas
+                </button>
+            </div>
         </main>
     </div>
 
@@ -464,6 +336,157 @@
             return value;
         }
 
+        // ============ FUNCIONES DE FEEDBACK VISUAL ============
+
+        function showToast(message, type = 'info') {
+            const oldToasts = document.querySelectorAll('.toast');
+            oldToasts.forEach(t => t.remove());
+            
+            const colors = {
+                success: '#4CAF50',
+                error: '#f44336',
+                info: '#2196F3',
+                warning: '#FF9800'
+            };
+            
+            const icons = {
+                success: '✅',
+                error: '❌',
+                info: 'ℹ️',
+                warning: '⚠️'
+            };
+            
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.innerHTML = `<span class="toast-icon">${icons[type] || 'ℹ️'}</span> ${message}`;
+            toast.style.cssText = `
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                background: ${colors[type] || '#333'};
+                color: white;
+                padding: 16px 24px;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                z-index: 9999;
+                font-weight: 500;
+                animation: slideIn 0.3s ease;
+                max-width: 400px;
+            `;
+            
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // ============ FUNCIONES DE ESTADÍSTICAS ============
+
+        function cargarEstadisticas() {
+            console.log('🔄 Cargando estadísticas...');
+            
+            fetch('/api/estadisticas')
+                .then(response => {
+                    console.log('📡 Respuesta recibida, status:', response.status);
+                    if (!response.ok) {
+                        throw new Error(`Error HTTP: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('📊 Datos recibidos:', data);
+                    
+                    if (data.error) {
+                        console.error('❌ Error del servidor:', data.error);
+                        showToast('❌ Error al cargar estadísticas: ' + data.error, 'error');
+                        return;
+                    }
+                    
+                    const elementos = {
+                        'promedio': data.promedio,
+                        'maxima': data.maxima,
+                        'minima': data.minima,
+                        'aprobados': `${data.aprobados}/${data.total}`,
+                        'reprobados': `${data.reprobados}/${data.total}`
+                    };
+                    
+                    for (const [id, valor] of Object.entries(elementos)) {
+                        const el = document.getElementById(id);
+                        if (el) {
+                            if (typeof valor === 'number') {
+                                el.textContent = valor.toFixed(2).replace('.', ',');
+                            } else {
+                                el.textContent = valor;
+                            }
+                        }
+                    }
+                    
+                    const total = data.total || 1;
+                    const colores = ['#f44336', '#FF9800', '#4CAF50', '#2196F3', '#9C27B0'];
+                    
+                    if (data.distribucion && data.distribucion.length === 5) {
+                        data.distribucion.forEach((valor, index) => {
+                            const barra = document.getElementById(`barra-${index}`);
+                            if (barra) {
+                                const porcentaje = (valor / total) * 100;
+                                barra.style.height = `${Math.max(porcentaje, 5)}%`;
+                                barra.style.background = colores[index] || '#667eea';
+                                barra.title = `${valor} estudiante${valor !== 1 ? 's' : ''}`;
+                            }
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('❌ Error al cargar estadísticas:', error);
+                    showToast('❌ Error al cargar estadísticas', 'error');
+                });
+        }
+
+        // ============ EXPORTAR A EXCEL ============
+
+        document.getElementById('exportExcelBtn').addEventListener('click', function() {
+            fetch('/api/estadisticas')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        showToast('❌ ' + data.error, 'error');
+                        return;
+                    }
+                    
+                    let csv = '\uFEFF';
+                    csv += 'Estudiante;Bloque A;Bloque B;Nota Final\n';
+                    
+                    data.estudiantes.forEach(est => {
+                        csv += `${est.nombre};${est.bloqueA.toString().replace('.', ',')};${est.bloqueB.toString().replace('.', ',')};${est.nota.toString().replace('.', ',')}\n`;
+                    });
+                    
+                    csv += '\n;ESTADÍSTICAS;\n';
+                    csv += `Promedio;${data.promedio.toString().replace('.', ',')};\n`;
+                    csv += `Nota Máxima;${data.maxima.toString().replace('.', ',')};\n`;
+                    csv += `Nota Mínima;${data.minima.toString().replace('.', ',')};\n`;
+                    csv += `Aprobados;${data.aprobados}/${data.total};\n`;
+                    csv += `Reprobados;${data.reprobados}/${data.total};\n`;
+                    
+                    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `calificaciones_${new Date().toLocaleDateString()}.csv`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                    
+                    showToast('✅ Excel exportado correctamente', 'success');
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showToast('❌ Error al exportar', 'error');
+                });
+        });
+
         // ============ GUARDAR CAMBIO ============
         
         function guardarCambio(element) {
@@ -475,21 +498,22 @@
             const valor = parseCommaNumber(valorTexto);
             
             if (isNaN(valor)) {
-                alert('Ingresa un valor numérico válido (ej: 15,5)');
+                showToast('❌ Ingresa un valor numérico válido (ej: 15,5)', 'error');
                 element.classList.add('error');
                 element.focus();
                 return;
             }
             
             if (valor < 0 || valor > 20) {
-                alert('La nota debe estar entre 0 y 20');
+                showToast('❌ La nota debe estar entre 0 y 20', 'error');
                 element.classList.add('error');
                 element.focus();
                 return;
             }
             
             element.value = formatWithComma(valor);
-            element.classList.add('success');
+            element.classList.add('loading');
+            showToast('💾 Guardando...', 'info');
             
             fetch('/api/actualizar', {
                 method: 'POST',
@@ -505,26 +529,34 @@
             })
             .then(response => response.json())
             .then(data => {
+                element.classList.remove('loading');
+                
                 if (data.success) {
+                    element.classList.add('success');
+                    showToast('✅ ¡Guardado exitosamente!', 'success');
+                    
+                    if (['cuaderno', 'gestion', 'quiz', 'informes', 'bloqueA', 'bloqueB'].includes(campo)) {
+                        setTimeout(cargarEstadisticas, 500);
+                    }
+                    
                     setTimeout(() => {
                         element.classList.remove('success');
                         element.value = formatWithComma(valor);
-                    }, 1500);
+                    }, 2000);
                     
-                    // Si se actualizó una nota de componente, recargar para ver cambios
-                    if (['cuaderno', 'gestion', 'quiz', 'informes'].includes(campo) || 
-                        campo === 'bloqueA' || campo === 'bloqueB') {
-                        setTimeout(() => location.reload(), 1000);
+                    if (campo === 'bloqueA' || campo === 'bloqueB') {
+                        setTimeout(() => location.reload(), 1500);
                     }
                 } else {
-                    alert('Error: ' + (data.error || 'No se pudo guardar'));
                     element.classList.add('error');
+                    showToast('❌ Error: ' + (data.error || 'No se pudo guardar'), 'error');
                 }
             })
             .catch(error => {
-                console.error('Error:', error);
-                alert('Error al guardar');
+                element.classList.remove('loading');
                 element.classList.add('error');
+                showToast('❌ Error al guardar', 'error');
+                console.error('Error:', error);
             });
         }
 
@@ -632,12 +664,12 @@
             });
             
             if (errors.length > 0) {
-                alert('❌ Hay valores inválidos:\n' + errors.join('\n'));
+                showToast('❌ Hay valores inválidos', 'error');
                 return;
             }
             
             if (promises.length === 0) {
-                alert('No hay cambios válidos para guardar');
+                showToast('ℹ️ No hay cambios para guardar', 'info');
                 return;
             }
             
@@ -646,11 +678,11 @@
             
             Promise.all(promises)
                 .then(() => {
-                    alert('✅ ¡Todos los cambios guardados exitosamente!');
+                    showToast('✅ ¡Todos los cambios guardados!', 'success');
                     location.reload();
                 })
                 .catch(error => {
-                    alert('❌ Error al guardar los cambios');
+                    showToast('❌ Error al guardar los cambios', 'error');
                     console.error(error);
                 })
                 .finally(() => {
@@ -673,14 +705,14 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        alert('✅ ' + data.mensaje);
+                        showToast('✅ ' + data.mensaje, 'success');
                         location.reload();
                     } else {
-                        alert('❌ Error: ' + (data.error || 'No se pudo recalcular'));
+                        showToast('❌ Error: ' + (data.error || 'No se pudo recalcular'), 'error');
                     }
                 })
                 .catch(error => {
-                    alert('❌ Error al recalcular');
+                    showToast('❌ Error al recalcular', 'error');
                     console.error(error);
                 })
                 .finally(() => {
@@ -697,279 +729,15 @@
             }
         });
 
-        // ============ FUNCIONES DE ESTADÍSTICAS ============
+        // ============ INICIALIZACIÓN ============
 
-function cargarEstadisticas() {
-    fetch('/api/estadisticas')
-        .then(response => response.json())
-        .then(data => {
-            if (data.error) {
-                console.error('Error:', data.error);
-                return;
-            }
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Panel de administración cargado');
+            cargarEstadisticas();
             
-            // Actualizar estadísticas
-            document.getElementById('promedio').textContent = data.promedio.toFixed(2).replace('.', ',');
-            document.getElementById('maxima').textContent = data.maxima.toFixed(2).replace('.', ',');
-            document.getElementById('minima').textContent = data.minima.toFixed(2).replace('.', ',');
-            document.getElementById('aprobados').textContent = `${data.aprobados}/${data.total}`;
-            document.getElementById('reprobados').textContent = `${data.reprobados}/${data.total}`;
-            
-            // Actualizar distribución
-            const total = data.total || 1;
-            const colores = ['#f44336', '#FF9800', '#4CAF50', '#2196F3', '#9C27B0'];
-            
-            data.distribucion.forEach((valor, index) => {
-                const porcentaje = (valor / total) * 100;
-                const barra = document.getElementById(`barra-${index}`);
-                if (barra) {
-                    barra.style.height = `${Math.max(porcentaje, 5)}%`;
-                    barra.style.background = colores[index] || '#667eea';
-                    // Mostrar cantidad en la barra
-                    barra.title = `${valor} estudiante${valor !== 1 ? 's' : ''}`;
-                }
-            });
-        })
-        .catch(error => console.error('Error al cargar estadísticas:', error));
-}
-
-// ============ EXPORTAR A EXCEL ============
-
-document.getElementById('exportExcelBtn').addEventListener('click', function() {
-    fetch('/api/estadisticas')
-        .then(response => response.json())
-        .then(data => {
-            if (data.error) {
-                showToast('❌ ' + data.error, 'error');
-                return;
-            }
-            
-            // Crear contenido CSV
-            let csv = '\uFEFF'; // BOM para caracteres UTF-8 en Excel
-            csv += 'Estudiante;Bloque A;Bloque B;Nota Final\n';
-            
-            data.estudiantes.forEach(est => {
-                csv += `${est.nombre};${est.bloqueA.toString().replace('.', ',')};${est.bloqueB.toString().replace('.', ',')};${est.nota.toString().replace('.', ',')}\n`;
-            });
-            
-            // Agregar estadísticas al final
-            csv += '\n;ESTADÍSTICAS;\n';
-            csv += `Promedio;${data.promedio.toString().replace('.', ',')};\n`;
-            csv += `Nota Máxima;${data.maxima.toString().replace('.', ',')};\n`;
-            csv += `Nota Mínima;${data.minima.toString().replace('.', ',')};\n`;
-            csv += `Aprobados;${data.aprobados}/${data.total};\n`;
-            csv += `Reprobados;${data.reprobados}/${data.total};\n`;
-            
-            // Descargar archivo
-            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `calificaciones_${new Date().toLocaleDateString()}.csv`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-            
-            showToast('✅ Excel exportado correctamente', 'success');
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            showToast('❌ Error al exportar', 'error');
+            // Recargar estadísticas cada 60 segundos
+            setInterval(cargarEstadisticas, 60000);
         });
-});
-
-// ============ FUNCIONES DE FEEDBACK VISUAL ============
-
-// Sistema de notificaciones tipo toast
-function showToast(message, type = 'info') {
-    // Eliminar toasts anteriores
-    const oldToasts = document.querySelectorAll('.toast');
-    oldToasts.forEach(t => t.remove());
-    
-    const colors = {
-        success: '#4CAF50',
-        error: '#f44336',
-        info: '#2196F3',
-        warning: '#FF9800'
-    };
-    
-    const icons = {
-        success: '✅',
-        error: '❌',
-        info: 'ℹ️',
-        warning: '⚠️'
-    };
-    
-    const toast = document.createElement('div');
-    toast.className = `toast toast-${type}`;
-    toast.innerHTML = `<span class="toast-icon">${icons[type] || 'ℹ️'}</span> ${message}`;
-    toast.style.cssText = `
-        position: fixed;
-        bottom: 20px;
-        right: 20px;
-        background: ${colors[type] || '#333'};
-        color: white;
-        padding: 16px 24px;
-        border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-        z-index: 9999;
-        font-weight: 500;
-        animation: slideIn 0.3s ease;
-        max-width: 400px;
-    `;
-    
-    document.body.appendChild(toast);
-    
-    setTimeout(() => {
-        toast.style.animation = 'slideOut 0.3s ease';
-        setTimeout(() => toast.remove(), 300);
-    }, 3000);
-}
-
-// ============ FUNCIONES DE EXPORTACIÓN PARA EL DASHBOARD ============
-
-function exportarPDF() {
-    showToast('📄 Generando PDF...', 'info');
-    
-    // Cargar html2pdf.js si no está cargado
-    if (typeof html2pdf === 'undefined') {
-        const script = document.createElement('script');
-        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
-        document.head.appendChild(script);
-        
-        script.onload = function() {
-            generarPDF();
-        };
-    } else {
-        generarPDF();
-    }
-}
-
-function generarPDF() {
-    const element = document.querySelector('main');
-    const nombre = document.querySelector('.user-info span:first-child')?.textContent || 'estudiante';
-    
-    const opt = {
-        margin: 10,
-        filename: `Notas_${nombre}_${new Date().toLocaleDateString()}.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { 
-            scale: 2, 
-            useCORS: true,
-            backgroundColor: '#ffffff'
-        },
-        jsPDF: { 
-            unit: 'mm', 
-            format: 'a4', 
-            orientation: 'portrait' 
-        }
-    };
-    
-    html2pdf().set(opt).from(element).save()
-        .then(() => {
-            showToast('✅ PDF generado correctamente', 'success');
-        })
-        .catch(() => {
-            showToast('❌ Error al generar PDF', 'error');
-        });
-}
-
-// ============ INICIALIZACIÓN ============
-
-// Cargar estadísticas al iniciar
-document.addEventListener('DOMContentLoaded', function() {
-    cargarEstadisticas();
-    
-    // Recargar estadísticas cada 30 segundos
-    setInterval(cargarEstadisticas, 30000);
-});
-
-// ============ SOBRESCRIBIR GUARDAR CAMBIO CON FEEDBACK ============
-
-// Esta función reemplaza la función guardarCambio existente
-// con una versión mejorada que incluye feedback visual
-
-// Guardar la función original si existe
-const originalGuardarCambio = window.guardarCambio || function() {};
-
-// Nueva función mejorada
-function guardarCambioConFeedback(element) {
-    const estudiante = element.dataset.estudiante;
-    const campo = element.dataset.campo;
-    const indice = element.dataset.indice;
-    
-    const valorTexto = element.value;
-    const valor = parseCommaNumber(valorTexto);
-    
-    if (isNaN(valor)) {
-        showToast('❌ Ingresa un valor numérico válido (ej: 15,5)', 'error');
-        element.classList.add('error');
-        element.focus();
-        return;
-    }
-    
-    if (valor < 0 || valor > 20) {
-        showToast('❌ La nota debe estar entre 0 y 20', 'error');
-        element.classList.add('error');
-        element.focus();
-        return;
-    }
-    
-    // Mostrar estado de carga
-    element.value = formatWithComma(valor);
-    element.classList.add('loading');
-    showToast('💾 Guardando...', 'info');
-    
-    fetch('/api/actualizar', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            estudiante: estudiante,
-            campo: campo,
-            valor: valor,
-            indice: indice ? parseInt(indice) : null
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        element.classList.remove('loading');
-        
-        if (data.success) {
-            element.classList.add('success');
-            showToast('✅ ¡Guardado exitosamente!', 'success');
-            
-            // Actualizar estadísticas si se modificó una nota
-            if (['cuaderno', 'gestion', 'quiz', 'informes', 'bloqueA', 'bloqueB'].includes(campo)) {
-                setTimeout(cargarEstadisticas, 500);
-            }
-            
-            setTimeout(() => {
-                element.classList.remove('success');
-                element.value = formatWithComma(valor);
-            }, 2000);
-            
-            // Si se actualizó Bloque A o B, recargar para ver cambios
-            if (campo === 'bloqueA' || campo === 'bloqueB') {
-                setTimeout(() => location.reload(), 1500);
-            }
-        } else {
-            element.classList.add('error');
-            showToast('❌ Error: ' + (data.error || 'No se pudo guardar'), 'error');
-        }
-    })
-    .catch(error => {
-        element.classList.remove('loading');
-        element.classList.add('error');
-        showToast('❌ Error al guardar', 'error');
-        console.error('Error:', error);
-    });
-}
-
-// Reemplazar la función guardarCambio
-window.guardarCambio = guardarCambioConFeedback;
     </script>
 </body>
 </html>
