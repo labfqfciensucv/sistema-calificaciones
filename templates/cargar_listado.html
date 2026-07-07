@@ -3,15 +3,214 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel de Administración</title>
+    <title>Cargar Listado de Estudiantes</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .upload-container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 30px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        
+        .upload-area {
+            border: 2px dashed #ddd;
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        
+        .upload-area:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+        
+        .upload-area.dragover {
+            border-color: #667eea;
+            background: #e8ecff;
+        }
+        
+        .upload-area i {
+            font-size: 3rem;
+            color: #667eea;
+            margin-bottom: 16px;
+        }
+        
+        .upload-area h3 {
+            color: #333;
+            margin-bottom: 8px;
+        }
+        
+        .upload-area p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .preview-table {
+            margin-top: 24px;
+            overflow-x: auto;
+        }
+        
+        .preview-table table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+        
+        .preview-table th {
+            background: #f8f9fa;
+            padding: 10px 12px;
+            text-align: left;
+            border-bottom: 2px solid #dee2e6;
+        }
+        
+        .preview-table td {
+            padding: 8px 12px;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .preview-table tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .badge-success {
+            background: #d4edda;
+            color: #155724;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .btn-upload {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 32px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 16px;
+            font-size: 1rem;
+        }
+        
+        .btn-upload:hover {
+            background: #5a6fd4;
+            transform: translateY(-2px);
+        }
+        
+        .btn-upload:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 12px 32px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 16px;
+            margin-left: 8px;
+            font-size: 1rem;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            vertical-align: middle;
+            margin-right: 8px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .result-box {
+            margin-top: 20px;
+            padding: 16px 20px;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+        
+        .result-box.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .result-box.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .result-box.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        
+        .header-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .header-actions h2 {
+            margin: 0;
+        }
+        
+        @media (max-width: 768px) {
+            .upload-container {
+                margin: 16px;
+                padding: 16px;
+            }
+            
+            .upload-area {
+                padding: 20px;
+            }
+            
+            .header-actions {
+                flex-direction: column;
+                gap: 12px;
+                align-items: stretch;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="admin-container">
         <header>
             <div class="header-content">
-                <h1>⚙️ Panel de Administración</h1>
+                <h1>📋 Cargar Listado de Estudiantes</h1>
                 <div class="user-info">
                     <span>Administrador</span>
                     <a href="{{ url_for('logout') }}" class="btn-logout">Cerrar Sesión</a>
@@ -20,328 +219,61 @@
         </header>
 
         <main>
-            <div class="admin-nav">
-                <button class="nav-btn active" data-section="general">📊 General</button>
-                <button class="nav-btn" data-section="cuaderno">📓 Cuaderno</button>
-                <button class="nav-btn" data-section="gestion">🧪 Gestión</button>
-                <button class="nav-btn" data-section="quiz">📝 Quiz</button>
-                <button class="nav-btn" data-section="informes">📄 Informes</button>
-            </div>
-
-            <!-- ====== PANEL DE ESTADÍSTICAS ====== -->
-            <div class="stats-container" id="statsContainer">
-                <div class="stat-card">
-                    <span class="stat-value" id="promedio">-</span>
-                    <span class="stat-label">📊 Promedio</span>
-                </div>
-                <div class="stat-card">
-                    <span class="stat-value green" id="maxima">-</span>
-                    <span class="stat-label">⬆️ Nota Máxima</span>
-                </div>
-                <div class="stat-card">
-                    <span class="stat-value red" id="minima">-</span>
-                    <span class="stat-label">⬇️ Nota Mínima</span>
-                </div>
-                <div class="stat-card">
-                    <span class="stat-value green" id="aprobados">-</span>
-                    <span class="stat-label">✅ Aprobados</span>
-                </div>
-                <div class="stat-card">
-                    <span class="stat-value orange" id="reprobados">-</span>
-                    <span class="stat-label">❌ Reprobados</span>
-                </div>
-            </div>
-
-            <!-- ====== DISTRIBUCIÓN DE NOTAS ====== -->
-            <div class="card" style="margin-bottom: 24px;">
-                <h3>📊 Distribución de Notas</h3>
-                <div class="distribucion-container" id="distribucionContainer">
-                    <div class="barra-distribucion">
-                        <div class="barra" id="barra-0" style="height: 0%;"></div>
-                        <span class="barra-label">0-4</span>
-                    </div>
-                    <div class="barra-distribucion">
-                        <div class="barra" id="barra-1" style="height: 0%;"></div>
-                        <span class="barra-label">5-9</span>
-                    </div>
-                    <div class="barra-distribucion">
-                        <div class="barra" id="barra-2" style="height: 0%;"></div>
-                        <span class="barra-label">10-14</span>
-                    </div>
-                    <div class="barra-distribucion">
-                        <div class="barra" id="barra-3" style="height: 0%;"></div>
-                        <span class="barra-label">15-17</span>
-                    </div>
-                    <div class="barra-distribucion">
-                        <div class="barra" id="barra-4" style="height: 0%;"></div>
-                        <span class="barra-label">18-20</span>
-                    </div>
-                </div>
-            </div>
-
-            <div id="admin-content">
-                <!-- Sección General -->
-                <div class="section-content active" id="section-general">
-                    <h2>Notas Generales <small style="font-weight: normal; color: #666;">(Base 20 - 10 semanas)</small></h2>
-                    <div class="table-responsive">
-                        <table class="admin-table">
-                            <thead>
-                                <tr>
-                                    <th>Estudiante</th>
-                                    <th>Bloque A (85%)</th>
-                                    <th>Bloque B (15%)</th>
-                                    <th>Nota Final</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for estudiante, final in estudiantes.final.items() %}
-                                <tr>
-                                    <td>{{ estudiante }}</td>
-                                    <td>
-                                        <input type="text" class="editable editable-comma" 
-                                               data-estudiante="{{ estudiante }}" 
-                                               data-campo="bloqueA" 
-                                               value="{{ estudiantes.bloqueA[estudiante]|comma }}"
-                                               step="0.01" min="0" max="20"
-                                               title="Nota Bloque A (0-20)"
-                                               data-original="{{ estudiantes.bloqueA[estudiante] }}">
-                                    </td>
-                                    <td>
-                                        <input type="text" class="editable editable-comma" 
-                                               data-estudiante="{{ estudiante }}" 
-                                               data-campo="bloqueB" 
-                                               value="{{ estudiantes.bloqueB_raw[estudiante]|comma }}"
-                                               step="0.01" min="0" max="20"
-                                               title="Nota Bloque B (0-20)"
-                                               data-original="{{ estudiantes.bloqueB_raw[estudiante] }}">
-                                    </td>
-                                    <td class="final-grade">{{ final|comma }}</td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
+            <div class="upload-container">
+                <div class="header-actions">
+                    <h2><i class="fas fa-file-upload"></i> Importar Estudiantes</h2>
+                    <a href="{{ url_for('admin') }}" class="btn-secondary" style="margin: 0;">
+                        <i class="fas fa-arrow-left"></i> Volver al Panel
+                    </a>
                 </div>
 
-                <!-- Sección Cuaderno -->
-                <div class="section-content" id="section-cuaderno">
-                    <h2>Notas de Cuaderno <small style="font-weight: normal; color: #666;">(10 semanas)</small></h2>
-                    <div class="table-responsive">
-                        <table class="admin-table">
-                            <thead>
-                                <tr>
-                                    <th>Estudiante</th>
-                                    {% for i in range(1, 11) %}
-                                    <th>Sem {{ i }}</th>
-                                    {% endfor %}
-                                    <th>Prom</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for estudiante, notas in estudiantes.cuaderno.items() %}
-                                <tr>
-                                    <td>{{ estudiante }}</td>
-                                    {% for i in range(10) %}
-                                    <td>
-                                        <input type="text" class="editable editable-comma" 
-                                               data-estudiante="{{ estudiante }}" 
-                                               data-campo="cuaderno"
-                                               data-indice="{{ i }}"
-                                               value="{{ notas[i]|comma }}"
-                                               step="0.01" min="0" max="20"
-                                               title="Semana {{ i+1 }} (0-20)"
-                                               data-original="{{ notas[i] }}">
-                                        {% if notas[i] > 0 %}
-                                        <span style="font-size: 0.6rem; color: #4CAF50;">✓</span>
-                                        {% endif %}
-                                    </td>
-                                    {% endfor %}
-                                    <td style="font-weight: 600; color: #2196F3;">
-                                        {{ (notas[:10]|select('gt', 0)|list|sum / (notas[:10]|select('gt', 0)|list|length) if (notas[:10]|select('gt', 0)|list|length) > 0 else 0)|comma }}
-                                        <span style="font-size: 0.6rem; color: #999;">
-                                            ({{ notas[:10]|select('gt', 0)|list|length }}/10)
-                                        </span>
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
+                <div class="upload-area" id="uploadArea">
+                    <i class="fas fa-file-excel"></i>
+                    <h3>Arrastra tu archivo aquí</h3>
+                    <p>o haz clic para seleccionarlo</p>
+                    <p style="font-size: 0.8rem; color: #999; margin-top: 8px;">
+                        Formatos soportados: .xlsx, .xls, .csv
+                    </p>
+                    <input type="file" class="file-input" id="fileInput" accept=".xlsx,.xls,.csv">
                 </div>
 
-                <!-- Sección Gestión -->
-                <div class="section-content" id="section-gestion">
-                    <h2>Notas de Gestión de Laboratorio <small style="font-weight: normal; color: #666;">(10 semanas)</small></h2>
-                    <div class="table-responsive">
-                        <table class="admin-table">
-                            <thead>
-                                <tr>
-                                    <th>Estudiante</th>
-                                    {% for i in range(1, 11) %}
-                                    <th>Sem {{ i }}</th>
-                                    {% endfor %}
-                                    <th>Prom</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for estudiante, notas in estudiantes.gestion.items() %}
-                                <tr>
-                                    <td>{{ estudiante }}</td>
-                                    {% for i in range(10) %}
-                                    <td>
-                                        <input type="text" class="editable editable-comma" 
-                                               data-estudiante="{{ estudiante }}" 
-                                               data-campo="gestion"
-                                               data-indice="{{ i }}"
-                                               value="{{ notas[i]|comma }}"
-                                               step="0.01" min="0" max="20"
-                                               title="Semana {{ i+1 }} (0-20)"
-                                               data-original="{{ notas[i] }}">
-                                        {% if notas[i] > 0 %}
-                                        <span style="font-size: 0.6rem; color: #4CAF50;">✓</span>
-                                        {% endif %}
-                                    </td>
-                                    {% endfor %}
-                                    <td style="font-weight: 600; color: #2196F3;">
-                                        {{ (notas[:10]|select('gt', 0)|list|sum / (notas[:10]|select('gt', 0)|list|length) if (notas[:10]|select('gt', 0)|list|length) > 0 else 0)|comma }}
-                                        <span style="font-size: 0.6rem; color: #999;">
-                                            ({{ notas[:10]|select('gt', 0)|list|length }}/10)
-                                        </span>
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
+                <div style="text-align: center; margin-top: 16px;">
+                    <button class="btn-upload" id="uploadBtn" disabled>
+                        <i class="fas fa-upload"></i> Cargar Listado
+                    </button>
+                    <span style="margin: 0 8px; color: #999;">o</span>
+                    <button class="btn-secondary" id="clearBtn" style="margin: 0;">
+                        <i class="fas fa-times"></i> Limpiar
+                    </button>
                 </div>
 
-                <!-- Sección Quiz -->
-                <div class="section-content" id="section-quiz">
-                    <h2>Notas de Quiz <small style="font-weight: normal; color: #666;">(10 semanas)</small></h2>
-                    <div class="table-responsive">
-                        <table class="admin-table">
-                            <thead>
-                                <tr>
-                                    <th>Estudiante</th>
-                                    {% for i in range(1, 11) %}
-                                    <th>Q {{ i }}</th>
-                                    {% endfor %}
-                                    <th>Prom</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for estudiante, notas in estudiantes.quiz.items() %}
-                                <tr>
-                                    <td>{{ estudiante }}</td>
-                                    {% for i in range(10) %}
-                                    <td>
-                                        <input type="text" class="editable editable-comma" 
-                                               data-estudiante="{{ estudiante }}" 
-                                               data-campo="quiz"
-                                               data-indice="{{ i }}"
-                                               value="{{ notas[i]|comma }}"
-                                               step="0.01" min="0" max="20"
-                                               title="Quiz {{ i+1 }} (0-20)"
-                                               data-original="{{ notas[i] }}">
-                                        {% if notas[i] > 0 %}
-                                        <span style="font-size: 0.6rem; color: #4CAF50;">✓</span>
-                                        {% endif %}
-                                    </td>
-                                    {% endfor %}
-                                    <td style="font-weight: 600; color: #2196F3;">
-                                        {{ (notas[:10]|select('gt', 0)|list|sum / (notas[:10]|select('gt', 0)|list|length) if (notas[:10]|select('gt', 0)|list|length) > 0 else 0)|comma }}
-                                        <span style="font-size: 0.6rem; color: #999;">
-                                            ({{ notas[:10]|select('gt', 0)|list|length }}/10)
-                                        </span>
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
+                <div class="preview-table" id="previewContainer" style="display: none;">
+                    <h4 style="margin-top: 16px;">
+                        <i class="fas fa-users"></i> Vista Previa 
+                        <span class="badge-success" id="countBadge">0 estudiantes</span>
+                    </h4>
+                    <div id="previewTable"></div>
                 </div>
 
-                <!-- Sección Informes -->
-                <div class="section-content" id="section-informes">
-                    <h2>Notas de Informes <small style="font-weight: normal; color: #666;">(A-E)</small></h2>
-                    <div class="table-responsive">
-                        <table class="admin-table">
-                            <thead>
-                                <tr>
-                                    <th>Estudiante</th>
-                                    <th>Inf A</th>
-                                    <th>Inf B</th>
-                                    <th>Inf C</th>
-                                    <th>Inf D</th>
-                                    <th>Inf E</th>
-                                    <th>Suma</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for estudiante, notas in estudiantes.informes.items() %}
-                                <tr>
-                                    <td>{{ estudiante }}</td>
-                                    {% for i in range(5) %}
-                                    <td>
-                                        <input type="text" class="editable editable-comma" 
-                                               data-estudiante="{{ estudiante }}" 
-                                               data-campo="informes"
-                                               data-indice="{{ i }}"
-                                               value="{{ notas[i]|comma }}"
-                                               step="0.01" min="0" max="20"
-                                               title="Informe {{ ['A','B','C','D','E'][i] }} (0-20)"
-                                               data-original="{{ notas[i] }}">
-                                    </td>
-                                    {% endfor %}
-                                    <td style="font-weight: 600; color: #FF9800;">
-                                        {{ notas|sum|comma }}
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <div class="admin-actions">
-                <button class="btn-save" id="saveAllBtn"><i class="fas fa-save"></i> Guardar Todos los Cambios</button>
-                <button class="btn-reload" id="reloadDataBtn"><i class="fas fa-sync"></i> Recargar Datos</button>
-                <button class="btn-export" id="exportExcelBtn"><i class="fas fa-file-excel"></i> Exportar Excel</button>
-                <a href="{{ url_for('cargar_listado') }}" class="btn-import" style="background: #9C27B0; color: white; padding: 10px 24px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s; text-decoration: none; display: inline-flex; align-items: center; gap: 8px;">
-                    <i class="fas fa-file-import"></i> Importar Listado
-                </a>
-                <button class="btn-recalculate" id="recalculateBtn" style="background: #6c757d; color: white; padding: 10px 24px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s;">
-                    <i class="fas fa-calculator"></i> Recalcular Notas
-                </button>
+                <div id="resultContainer"></div>
             </div>
         </main>
     </div>
 
     <script>
-        // ============ FUNCIONES DE FORMATO CON COMA ============
-        
-        function formatWithComma(value) {
-            if (value === null || value === undefined || isNaN(value)) {
-                return '0,00';
-            }
-            return Number(value).toFixed(2).replace('.', ',');
-        }
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const previewContainer = document.getElementById('previewContainer');
+        const previewTable = document.getElementById('previewTable');
+        const countBadge = document.getElementById('countBadge');
+        const resultContainer = document.getElementById('resultContainer');
 
-        function parseCommaNumber(value) {
-            if (typeof value === 'string') {
-                const cleanValue = value.replace(',', '.');
-                return parseFloat(cleanValue);
-            }
-            return value;
-        }
-
-        // ============ FUNCIONES DE FEEDBACK VISUAL ============
+        let selectedFile = null;
+        let estudiantesData = null;
 
         function showToast(message, type = 'info') {
-            const oldToasts = document.querySelectorAll('.toast');
-            oldToasts.forEach(t => t.remove());
-            
             const colors = {
                 success: '#4CAF50',
                 error: '#f44336',
@@ -349,16 +281,7 @@
                 warning: '#FF9800'
             };
             
-            const icons = {
-                success: '✅',
-                error: '❌',
-                info: 'ℹ️',
-                warning: '⚠️'
-            };
-            
             const toast = document.createElement('div');
-            toast.className = `toast toast-${type}`;
-            toast.innerHTML = `<span class="toast-icon">${icons[type] || 'ℹ️'}</span> ${message}`;
             toast.style.cssText = `
                 position: fixed;
                 bottom: 20px;
@@ -373,7 +296,7 @@
                 animation: slideIn 0.3s ease;
                 max-width: 400px;
             `;
-            
+            toast.textContent = message;
             document.body.appendChild(toast);
             
             setTimeout(() => {
@@ -382,362 +305,202 @@
             }, 3000);
         }
 
-        // ============ FUNCIONES DE ESTADÍSTICAS ============
-
-        function cargarEstadisticas() {
-            console.log('🔄 Cargando estadísticas...');
-            
-            fetch('/api/estadisticas')
-                .then(response => {
-                    console.log('📡 Respuesta recibida, status:', response.status);
-                    if (!response.ok) {
-                        throw new Error(`Error HTTP: ${response.status}`);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    console.log('📊 Datos recibidos:', data);
-                    
-                    if (data.error) {
-                        console.error('❌ Error del servidor:', data.error);
-                        showToast('❌ Error al cargar estadísticas: ' + data.error, 'error');
-                        return;
-                    }
-                    
-                    const elementos = {
-                        'promedio': data.promedio,
-                        'maxima': data.maxima,
-                        'minima': data.minima,
-                        'aprobados': `${data.aprobados}/${data.total}`,
-                        'reprobados': `${data.reprobados}/${data.total}`
-                    };
-                    
-                    for (const [id, valor] of Object.entries(elementos)) {
-                        const el = document.getElementById(id);
-                        if (el) {
-                            if (typeof valor === 'number') {
-                                el.textContent = valor.toFixed(2).replace('.', ',');
-                            } else {
-                                el.textContent = valor;
-                            }
-                        }
-                    }
-                    
-                    const total = data.total || 1;
-                    const colores = ['#f44336', '#FF9800', '#4CAF50', '#2196F3', '#9C27B0'];
-                    
-                    if (data.distribucion && data.distribucion.length === 5) {
-                        data.distribucion.forEach((valor, index) => {
-                            const barra = document.getElementById(`barra-${index}`);
-                            if (barra) {
-                                const porcentaje = (valor / total) * 100;
-                                barra.style.height = `${Math.max(porcentaje, 5)}%`;
-                                barra.style.background = colores[index] || '#667eea';
-                                barra.title = `${valor} estudiante${valor !== 1 ? 's' : ''}`;
-                            }
-                        });
-                    }
-                })
-                .catch(error => {
-                    console.error('❌ Error al cargar estadísticas:', error);
-                    showToast('❌ Error al cargar estadísticas', 'error');
-                });
-        }
-
-        // ============ EXPORTAR A EXCEL ============
-
-        document.getElementById('exportExcelBtn').addEventListener('click', function() {
-            fetch('/api/estadisticas')
-                .then(response => response.json())
-                .then(data => {
-                    if (data.error) {
-                        showToast('❌ ' + data.error, 'error');
-                        return;
-                    }
-                    
-                    let csv = '\uFEFF';
-                    csv += 'Estudiante;Bloque A;Bloque B;Nota Final\n';
-                    
-                    data.estudiantes.forEach(est => {
-                        csv += `${est.nombre};${est.bloqueA.toString().replace('.', ',')};${est.bloqueB.toString().replace('.', ',')};${est.nota.toString().replace('.', ',')}\n`;
-                    });
-                    
-                    csv += '\n;ESTADÍSTICAS;\n';
-                    csv += `Promedio;${data.promedio.toString().replace('.', ',')};\n`;
-                    csv += `Nota Máxima;${data.maxima.toString().replace('.', ',')};\n`;
-                    csv += `Nota Mínima;${data.minima.toString().replace('.', ',')};\n`;
-                    csv += `Aprobados;${data.aprobados}/${data.total};\n`;
-                    csv += `Reprobados;${data.reprobados}/${data.total};\n`;
-                    
-                    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = `calificaciones_${new Date().toLocaleDateString()}.csv`;
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                    URL.revokeObjectURL(url);
-                    
-                    showToast('✅ Excel exportado correctamente', 'success');
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    showToast('❌ Error al exportar', 'error');
-                });
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
         });
 
-        // ============ GUARDAR CAMBIO ============
-        
-        function guardarCambio(element) {
-            const estudiante = element.dataset.estudiante;
-            const campo = element.dataset.campo;
-            const indice = element.dataset.indice;
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            if (e.dataTransfer.files.length) {
+                handleFile(e.dataTransfer.files[0]);
+            }
+        });
+
+        uploadArea.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length) {
+                handleFile(e.target.files[0]);
+            }
+        });
+
+        function handleFile(file) {
+            const validTypes = [
+                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                'application/vnd.ms-excel',
+                'text/csv'
+            ];
             
-            const valorTexto = element.value;
-            const valor = parseCommaNumber(valorTexto);
-            
-            if (isNaN(valor)) {
-                showToast('❌ Ingresa un valor numérico válido (ej: 15,5)', 'error');
-                element.classList.add('error');
-                element.focus();
+            if (!validTypes.includes(file.type) && !file.name.match(/\.(xlsx|xls|csv)$/)) {
+                showToast('❌ Tipo de archivo no soportado', 'error');
                 return;
             }
+
+            selectedFile = file;
+            uploadBtn.disabled = false;
             
-            if (valor < 0 || valor > 20) {
-                showToast('❌ La nota debe estar entre 0 y 20', 'error');
-                element.classList.add('error');
-                element.focus();
-                return;
-            }
-            
-            element.value = formatWithComma(valor);
-            element.classList.add('loading');
-            showToast('💾 Guardando...', 'info');
-            
-            fetch('/api/actualizar', {
+            uploadArea.innerHTML = `
+                <i class="fas fa-file-excel" style="color: #4CAF50;"></i>
+                <h3>${file.name}</h3>
+                <p>Tamaño: ${(file.size / 1024).toFixed(1)} KB</p>
+                <p style="font-size: 0.8rem; color: #4CAF50;">✅ Archivo seleccionado</p>
+            `;
+
+            previewFile(file);
+        }
+
+        function previewFile(file) {
+            const formData = new FormData();
+            formData.append('file', file);
+
+            previewContainer.style.display = 'block';
+            previewTable.innerHTML = '<p>Cargando vista previa...</p>';
+
+            fetch('/admin/preview-listado', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    estudiante: estudiante,
-                    campo: campo,
-                    valor: valor,
-                    indice: indice ? parseInt(indice) : null
-                })
+                body: formData
             })
             .then(response => response.json())
             .then(data => {
-                element.classList.remove('loading');
-                
-                if (data.success) {
-                    element.classList.add('success');
-                    showToast('✅ ¡Guardado exitosamente!', 'success');
-                    
-                    if (['cuaderno', 'gestion', 'quiz', 'informes', 'bloqueA', 'bloqueB'].includes(campo)) {
-                        setTimeout(cargarEstadisticas, 500);
-                    }
-                    
-                    setTimeout(() => {
-                        element.classList.remove('success');
-                        element.value = formatWithComma(valor);
-                    }, 2000);
-                    
-                    if (campo === 'bloqueA' || campo === 'bloqueB') {
-                        setTimeout(() => location.reload(), 1500);
-                    }
-                } else {
-                    element.classList.add('error');
-                    showToast('❌ Error: ' + (data.error || 'No se pudo guardar'), 'error');
+                if (data.error) {
+                    previewTable.innerHTML = `<p style="color: #f44336;">❌ ${data.error}</p>`;
+                    showToast('❌ ' + data.error, 'error');
+                    return;
                 }
+
+                estudiantesData = data;
+                renderPreview(data);
+                showToast(`✅ ${data.total} estudiantes encontrados`, 'success');
             })
             .catch(error => {
-                element.classList.remove('loading');
-                element.classList.add('error');
-                showToast('❌ Error al guardar', 'error');
-                console.error('Error:', error);
+                previewTable.innerHTML = `<p style="color: #f44336;">❌ Error al leer el archivo</p>`;
+                showToast('❌ Error al leer el archivo', 'error');
+                console.error(error);
             });
         }
 
-        // ============ INICIALIZAR INPUTS ============
-        
-        document.querySelectorAll('.editable-comma').forEach(input => {
-            const originalValue = input.dataset.original;
-            if (originalValue !== undefined) {
-                input.value = formatWithComma(originalValue);
-            }
-            
-            input.addEventListener('input', function() {
-                let value = this.value;
-                value = value.replace(/[^0-9,.-]/g, '');
-                value = value.replace('.', ',');
-                const parts = value.split(',');
-                if (parts.length > 2) {
-                    value = parts[0] + ',' + parts.slice(1).join('');
-                }
-                this.value = value;
-                
-                const num = parseCommaNumber(value);
-                if (!isNaN(num) && num >= 0 && num <= 20) {
-                    this.classList.remove('error');
-                    this.classList.add('success');
-                    setTimeout(() => this.classList.remove('success'), 500);
-                } else if (value !== '') {
-                    this.classList.add('error');
-                }
-            });
-            
-            input.addEventListener('blur', function() {
-                const num = parseCommaNumber(this.value);
-                if (!isNaN(num) && num >= 0 && num <= 20) {
-                    this.value = formatWithComma(num);
-                    this.classList.remove('error');
-                } else if (this.value !== '') {
-                    this.classList.add('error');
-                }
-            });
-            
-            input.addEventListener('keydown', function(e) {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    guardarCambio(this);
-                }
-            });
-            
-            input.addEventListener('blur', function() {
-                const original = parseFloat(this.dataset.original);
-                const current = parseCommaNumber(this.value);
-                if (!isNaN(current) && current !== original) {
-                    guardarCambio(this);
-                }
-            });
-        });
-
-        // ============ NAVEGACIÓN POR PESTAÑAS ============
-        
-        document.querySelectorAll('.nav-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-                this.classList.add('active');
-                
-                const section = this.dataset.section;
-                document.querySelectorAll('.section-content').forEach(s => s.classList.remove('active'));
-                document.getElementById(`section-${section}`).classList.add('active');
-            });
-        });
-
-        // ============ GUARDAR TODOS LOS CAMBIOS ============
-        
-        document.getElementById('saveAllBtn').addEventListener('click', function() {
-            const inputs = document.querySelectorAll('.editable-comma');
-            let promises = [];
-            let errors = [];
-            
-            inputs.forEach(input => {
-                const valorTexto = input.value;
-                const valor = parseCommaNumber(valorTexto);
-                
-                if (!isNaN(valor) && valor >= 0 && valor <= 20) {
-                    const estudiante = input.dataset.estudiante;
-                    const campo = input.dataset.campo;
-                    const indice = input.dataset.indice;
-                    
-                    promises.push(
-                        fetch('/api/actualizar', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({
-                                estudiante: estudiante,
-                                campo: campo,
-                                valor: valor,
-                                indice: indice ? parseInt(indice) : null
-                            })
-                        })
-                    );
-                } else if (valorTexto !== '') {
-                    errors.push('Valor inválido: ' + valorTexto);
-                    input.classList.add('error');
-                }
-            });
-            
-            if (errors.length > 0) {
-                showToast('❌ Hay valores inválidos', 'error');
+        function renderPreview(data) {
+            if (!data.estudiantes || data.estudiantes.length === 0) {
+                previewTable.innerHTML = '<p style="color: #FF9800;">⚠️ No se encontraron estudiantes en el archivo</p>';
                 return;
             }
-            
-            if (promises.length === 0) {
-                showToast('ℹ️ No hay cambios para guardar', 'info');
-                return;
-            }
-            
-            this.textContent = '⏳ Guardando...';
-            this.disabled = true;
-            
-            Promise.all(promises)
-                .then(() => {
-                    showToast('✅ ¡Todos los cambios guardados!', 'success');
-                    location.reload();
-                })
-                .catch(error => {
-                    showToast('❌ Error al guardar los cambios', 'error');
-                    console.error(error);
-                })
-                .finally(() => {
-                    this.textContent = '💾 Guardar Todos los Cambios';
-                    this.disabled = false;
-                });
+
+            countBadge.textContent = `${data.total} estudiantes`;
+
+            let html = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Cédula</th>
+                            <th>Nombres</th>
+                            <th>Apellidos</th>
+                            <th>Correo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            data.estudiantes.forEach((est, index) => {
+                html += `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td><strong>${est.cedula}</strong></td>
+                        <td>${est.nombres}</td>
+                        <td>${est.apellidos}</td>
+                        <td>${est.correo || '-'}</td>
+                    </tr>
+                `;
+            });
+
+            html += '</tbody></table>';
+            previewTable.innerHTML = html;
+        }
+
+        uploadBtn.addEventListener('click', () => {
+            if (!selectedFile) return;
+
+            const formData = new FormData();
+            formData.append('file', selectedFile);
+
+            uploadBtn.disabled = true;
+            uploadBtn.innerHTML = '<span class="loading-spinner"></span> Cargando...';
+
+            fetch('/admin/cargar-listado', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    showToast('❌ ' + data.error, 'error');
+                    uploadBtn.innerHTML = '<i class="fas fa-upload"></i> Cargar Listado';
+                    uploadBtn.disabled = false;
+                    return;
+                }
+
+                showToast(`✅ ${data.total_estudiantes} estudiantes cargados exitosamente`, 'success');
+
+                uploadBtn.innerHTML = '<i class="fas fa-check"></i> ¡Completado!';
+                uploadBtn.style.background = '#4CAF50';
+
+                setTimeout(() => {
+                    window.location.href = '/admin';
+                }, 2000);
+            })
+            .catch(error => {
+                showToast('❌ Error al cargar: ' + error.message, 'error');
+                uploadBtn.innerHTML = '<i class="fas fa-upload"></i> Cargar Listado';
+                uploadBtn.disabled = false;
+                console.error(error);
+            });
         });
 
-        // ============ RECALCULAR NOTAS ============
-        
-        document.getElementById('recalculateBtn').addEventListener('click', function() {
-            if (!confirm('¿Recalcular todas las notas a partir de los datos actuales?')) {
-                return;
-            }
-            
-            this.textContent = '⏳ Recalculando...';
-            this.disabled = true;
-            
-            fetch('/api/recalcular')
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        showToast('✅ ' + data.mensaje, 'success');
-                        location.reload();
-                    } else {
-                        showToast('❌ Error: ' + (data.error || 'No se pudo recalcular'), 'error');
-                    }
-                })
-                .catch(error => {
-                    showToast('❌ Error al recalcular', 'error');
-                    console.error(error);
-                })
-                .finally(() => {
-                    this.textContent = '🔄 Recalcular Notas';
-                    this.disabled = false;
-                });
+        clearBtn.addEventListener('click', () => {
+            selectedFile = null;
+            estudiantesData = null;
+            uploadBtn.disabled = true;
+            uploadBtn.innerHTML = '<i class="fas fa-upload"></i> Cargar Listado';
+            uploadBtn.style.background = '';
+            previewContainer.style.display = 'none';
+            previewTable.innerHTML = '';
+            resultContainer.innerHTML = '';
+            fileInput.value = '';
+            uploadArea.innerHTML = `
+                <i class="fas fa-file-excel"></i>
+                <h3>Arrastra tu archivo aquí</h3>
+                <p>o haz clic para seleccionarlo</p>
+                <p style="font-size: 0.8rem; color: #999; margin-top: 8px;">
+                    Formatos soportados: .xlsx, .xls, .csv
+                </p>
+            `;
         });
 
-        // ============ RECARGAR DATOS ============
-        
-        document.getElementById('reloadDataBtn').addEventListener('click', function() {
-            if (confirm('¿Recargar los datos? Los cambios no guardados se perderán.')) {
-                location.reload();
-            }
-        });
-
-        // ============ INICIALIZACIÓN ============
-
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('🚀 Panel de administración cargado');
-            cargarEstadisticas();
-            
-            // Recargar estadísticas cada 60 segundos
-            setInterval(cargarEstadisticas, 60000);
-        });
+        function showResult(type, message) {
+            const icons = {
+                success: '✅',
+                error: '❌',
+                info: 'ℹ️'
+            };
+            resultContainer.innerHTML = `
+                <div class="result-box ${type}">
+                    ${message}
+                </div>
+            `;
+            setTimeout(() => {
+                if (resultContainer.children.length > 0) {
+                    resultContainer.innerHTML = '';
+                }
+            }, 10000);
+        }
     </script>
 </body>
 </html>
