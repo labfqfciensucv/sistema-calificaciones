@@ -145,41 +145,57 @@
                 <button class="nav-btn" data-section="informes">📄 Informes</button>
             </div>
 
-            <!-- Agregar después de la navegación -->
-<div class="stats-container" id="statsContainer">
-    <div class="stat-card">
-        <span class="stat-value" id="promedio">-</span>
-        <span class="stat-label">Promedio</span>
-    </div>
-    <div class="stat-card">
-        <span class="stat-value" id="maxima">-</span>
-        <span class="stat-label">Nota Máxima</span>
-    </div>
-    <div class="stat-card">
-        <span class="stat-value" id="minima">-</span>
-        <span class="stat-label">Nota Mínima</span>
-    </div>
-    <div class="stat-card">
-        <span class="stat-value" id="aprobados">-</span>
-        <span class="stat-label">Aprobados</span>
-    </div>
-</div>
-
-<script>
-// Cargar estadísticas al iniciar
-function cargarEstadisticas() {
-    fetch('/api/estadisticas')
-        .then(response => response.json())
-        .then(data => {
-            document.getElementById('promedio').textContent = data.promedio.toFixed(2).replace('.', ',');
-            document.getElementById('maxima').textContent = data.maxima.toFixed(2).replace('.', ',');
-            document.getElementById('minima').textContent = data.minima.toFixed(2).replace('.', ',');
-            document.getElementById('aprobados').textContent = `${data.aprobados}/${data.total}`;
-        });
-}
-
-document.addEventListener('DOMContentLoaded', cargarEstadisticas);
-</script>
+           <!-- ====== PANEL DE ESTADÍSTICAS ====== -->
+            <div class="stats-container" id="statsContainer">
+                <div class="stat-card">
+                    <span class="stat-value" id="promedio">-</span>
+                    <span class="stat-label">📊 Promedio</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-value green" id="maxima">-</span>
+                    <span class="stat-label">⬆️ Nota Máxima</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-value red" id="minima">-</span>
+                    <span class="stat-label">⬇️ Nota Mínima</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-value green" id="aprobados">-</span>
+                    <span class="stat-label">✅ Aprobados</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-value orange" id="reprobados">-</span>
+                    <span class="stat-label">❌ Reprobados</span>
+                </div>
+            </div>
+            
+            <!-- ====== DISTRIBUCIÓN DE NOTAS ====== -->
+            <div class="card" style="margin-bottom: 24px;">
+                <h3>📊 Distribución de Notas</h3>
+                <div class="distribucion-container" id="distribucionContainer">
+                    <div class="barra-distribucion">
+                        <div class="barra" id="barra-0" style="height: 0%;"></div>
+                        <span class="barra-label">0-4</span>
+                    </div>
+                    <div class="barra-distribucion">
+                        <div class="barra" id="barra-1" style="height: 0%;"></div>
+                        <span class="barra-label">5-9</span>
+                    </div>
+                    <div class="barra-distribucion">
+                        <div class="barra" id="barra-2" style="height: 0%;"></div>
+                        <span class="barra-label">10-14</span>
+                    </div>
+                    <div class="barra-distribucion">
+                        <div class="barra" id="barra-3" style="height: 0%;"></div>
+                        <span class="barra-label">15-17</span>
+                    </div>
+                    <div class="barra-distribucion">
+                        <div class="barra" id="barra-4" style="height: 0%;"></div>
+                        <span class="barra-label">18-20</span>
+                    </div>
+                </div>
+            </div>
+            <!-- ====== FIN PANEL DE ESTADÍSTICAS ====== -->
 
             <div id="admin-content">
                 <!-- Sección General -->
