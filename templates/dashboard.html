@@ -247,5 +247,120 @@
             }
         });
     </script>
+    <script>
+// Función para exportar a PDF
+function exportarPDF() {
+    // Mostrar notificación
+    showToast('📄 Generando PDF...', 'info');
+    
+    // Cargar html2pdf.js si no está cargado
+    if (typeof html2pdf === 'undefined') {
+        const script = document.createElement('script');
+        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
+        document.head.appendChild(script);
+        
+        script.onload = function() {
+            generarPDFDashboard();
+        };
+        script.onerror = function() {
+            showToast('❌ Error al cargar la librería PDF', 'error');
+        };
+    } else {
+        generarPDFDashboard();
+    }
+}
+
+function generarPDFDashboard() {
+    const element = document.querySelector('main');
+    const nombre = document.querySelector('.user-info span:first-child')?.textContent || 'estudiante';
+    
+    const opt = {
+        margin: 10,
+        filename: `Notas_${nombre}_${new Date().toLocaleDateString().replace(/\//g, '-')}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { 
+            scale: 2, 
+            useCORS: true,
+            backgroundColor: '#ffffff'
+        },
+        jsPDF: { 
+            unit: 'mm', 
+            format: 'a4', 
+            orientation: 'portrait' 
+        }
+    };
+    
+    html2pdf().set(opt).from(element).save()
+        .then(() => {
+            showToast('✅ PDF generado correctamente', 'success');
+        })
+        .catch((error) => {
+            console.error('Error al generar PDF:', error);
+            showToast('❌ Error al generar PDF', 'error');
+        });
+}
+
+// Sistema de notificaciones tipo toast (mismo que en admin)
+function showToast(message, type = 'info') {
+    const oldToasts = document.querySelectorAll('.toast');
+    oldToasts.forEach(t => t.remove());
+    
+    const colors = {
+        success: '#4CAF50',
+        error: '#f44336',
+        info: '#2196F3',
+        warning: '#FF9800'
+    };
+    
+    const icons = {
+        success: '✅',
+        error: '❌',
+        info: 'ℹ️',
+        warning: '⚠️'
+    };
+    
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.innerHTML = `<span class="toast-icon">${icons[type] || 'ℹ️'}</span> ${message}`;
+    toast.style.cssText = `
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background: ${colors[type] || '#333'};
+        color: white;
+        padding: 16px 24px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        z-index: 9999;
+        font-weight: 500;
+        animation: slideIn 0.3s ease;
+        max-width: 400px;
+    `;
+    
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
+
+// Agregar estilos para animaciones si no existen
+if (!document.getElementById('toast-styles')) {
+    const style = document.createElement('style');
+    style.id = 'toast-styles';
+    style.textContent = `
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes slideOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+    `;
+    document.head.appendChild(style);
+}
+</script>
 </body>
 </html>
