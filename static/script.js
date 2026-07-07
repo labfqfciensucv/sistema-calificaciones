@@ -129,4 +129,23 @@ function showToast(message, type = 'info') {
         setTimeout(() => toast.remove(), 300);
     }, 3000);
 }
+
+function exportarPDF() {
+    // Usar html2pdf.js para generar PDF
+    const script = document.createElement('script');
+    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
+    document.head.appendChild(script);
+    
+    script.onload = function() {
+        const element = document.querySelector('main');
+        const opt = {
+            margin: 10,
+            filename: `Notas_${document.querySelector('.user-info span:first-child').textContent}.pdf`,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2, useCORS: true },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+        html2pdf().set(opt).from(element).save();
+    };
+}
 });
